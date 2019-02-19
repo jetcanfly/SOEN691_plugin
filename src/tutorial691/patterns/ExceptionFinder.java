@@ -2,6 +2,7 @@ package tutorial691.patterns;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.JavaModelException;
@@ -9,6 +10,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import tutorial691.handlers.SampleHandler;
 import tutorial691.visitors.ExceptionVisitor;
+import tutorial691.visitors.MultipleThrowsVisitor;
 
 import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.dom.*;
@@ -32,9 +34,25 @@ public class ExceptionFinder {
 			CompilationUnit parsedCompilationUnit = parse(unit);
 			
 			// We should build 3 Visitors here and use them one by one.
-//			ExceptionVisitor exceptionVisitor = new ExceptionVisitor(this.methodException, project);
+			ExceptionVisitor exceptionVisitor = new ExceptionVisitor(this.methodException, project);
+			MultipleThrowsVisitor multipleException  = new MultipleThrowsVisitor();
 //			parsedCompilationUnit.accept(exceptionVisitor);
 //			printOverCatchExceptions(exceptionVisitor);
+			parsedCompilationUnit.accept(multipleException);
+			printMultipleExceptions(multipleException);
+		}
+	}
+	
+	private void printMultipleExceptions(MultipleThrowsVisitor visitor) {
+			List<SimpleName> = visitor.getMethodName();
+			for(int i = 0; i< visitor.getMethodName().size(); i++) {
+				
+			}
+		for(List<Type> list : visitor.getMultipleException()) {
+			for(Object type:list) {
+			SampleHandler.printMessage(type.toString());
+			System.out.println(type.toString());
+			}
 		}
 	}
 	
