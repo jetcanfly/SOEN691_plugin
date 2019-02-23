@@ -9,7 +9,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import tutorial691.handlers.SampleHandler;
 import tutorial691.visitors.ExceptionVisitor;
-import tutorial691.visitors.LogAndThrowVistor;
+import tutorial691.visitors.LogAndThrowVisitor;
 
 import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.dom.*;
@@ -34,7 +34,7 @@ public class ExceptionFinder {
 			
 			// We should build 3 Visitors here and use them one by one.
 //			ExceptionVisitor exceptionVisitor = new ExceptionVisitor(this.methodException, project);
-			LogAndThrowVistor logAndThrowVistor = new LogAndThrowVistor();
+			LogAndThrowVisitor logAndThrowVistor = new LogAndThrowVisitor();
 //			parsedCompilationUnit.accept(exceptionVisitor);
 //			printOverCatchExceptions(exceptionVisitor);
 			parsedCompilationUnit.accept(logAndThrowVistor);
@@ -42,7 +42,7 @@ public class ExceptionFinder {
 		}
 	}
 	
-	private void printLogAndThrowExceptions(LogAndThrowVistor visitor) {
+	private void printLogAndThrowExceptions(LogAndThrowVisitor visitor) {
 		for (CatchClause catchClause : visitor.getLogAndThrowCathesCatchClauses()) {
 			MethodDeclaration methodDeclaration = findMethodForCatch(catchClause);
 			
