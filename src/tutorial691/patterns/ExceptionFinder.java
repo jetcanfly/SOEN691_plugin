@@ -39,20 +39,34 @@ public class ExceptionFinder {
 //			parsedCompilationUnit.accept(exceptionVisitor);
 //			printOverCatchExceptions(exceptionVisitor);
 			parsedCompilationUnit.accept(multipleException);
+			printInformation(packageFragment, unit);
 			printMultipleExceptions(multipleException);
 		}
 	}
 	
+	
+	private void printInformation(IPackageFragment packageName, ICompilationUnit unit) {
+		System.out.println("Package: " + packageName.getElementName());
+		SampleHandler.printMessage("Package: " + packageName.getElementName());
+		System.out.println("Class: " + unit.getElementName());
+		SampleHandler.printMessage("Class: " + (unit.getElementName()));
+	}
+	
+	
 	private void printMultipleExceptions(MultipleThrowsVisitor visitor) {
-			List<SimpleName> = visitor.getMethodName();
-			for(int i = 0; i< visitor.getMethodName().size(); i++) {
-				
+		List<List<Type>> exceptionNames = visitor.getMultipleException();
+		List<SimpleName> methodNames = visitor.getMethodName();
+		for(int i=0; i<methodNames.size();i++) {
+			SampleHandler.printMessage("Method: "+methodNames.get(i).toString());
+			System.out.println("Method: "+methodNames.get(i).toString());
+			SampleHandler.printMessage("Exception Names: ");
+			System.out.println("Exception Names: ");
+			for(Object type:exceptionNames.get(i)) {
+				SampleHandler.printMessage(type.toString());
+				System.out.println(type.toString());
 			}
-		for(List<Type> list : visitor.getMultipleException()) {
-			for(Object type:list) {
-			SampleHandler.printMessage(type.toString());
-			System.out.println(type.toString());
-			}
+			System.out.print("\n");
+			SampleHandler.printMessage("");
 		}
 	}
 	
