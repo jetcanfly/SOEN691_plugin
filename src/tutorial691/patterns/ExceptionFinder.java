@@ -10,6 +10,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import tutorial691.handlers.SampleHandler;
 import tutorial691.visitors.ExceptionVisitor;
+import tutorial691.visitors.LogAndThrowVisitor;
 import tutorial691.visitors.MultipleThrowsVisitor;
 
 import org.eclipse.jdt.core.*;
@@ -34,6 +35,25 @@ public class ExceptionFinder {
 			CompilationUnit parsedCompilationUnit = parse(unit);
 			
 			// We should build 3 Visitors here and use them one by one.
+
+//			ExceptionVisitor exceptionVisitor = new ExceptionVisitor(this.methodException, project);
+			LogAndThrowVisitor logAndThrowVistor = new LogAndThrowVisitor();
+//			parsedCompilationUnit.accept(exceptionVisitor);
+//			printOverCatchExceptions(exceptionVisitor);
+			parsedCompilationUnit.accept(logAndThrowVistor);
+			printLogAndThrowExceptions(logAndThrowVistor);
+		}
+	}
+	
+	private void printLogAndThrowExceptions(LogAndThrowVisitor visitor) {
+		for (CatchClause catchClause : visitor.getLogAndThrowCathesCatchClauses()) {
+			MethodDeclaration methodDeclaration = findMethodForCatch(catchClause);
+			
+			SampleHandler.printMessage("find method suffers from Log and Throw: \n" + methodDeclaration.toString());
+			System.out.println("find method suffers from Log and Throw: \n" + methodDeclaration.toString());
+			SampleHandler.printMessage(catchClause.toString());
+			System.out.println(catchClause.toString());
+
 			ExceptionVisitor exceptionVisitor = new ExceptionVisitor(this.methodException, project);
 			MultipleThrowsVisitor multipleException  = new MultipleThrowsVisitor();
 //			parsedCompilationUnit.accept(exceptionVisitor);
@@ -92,6 +112,10 @@ public class ExceptionFinder {
 	}
 	
 	private MethodDeclaration findMethodForCatch(TryStatement catchClause) {
+		return (MethodDeclaration) findParentMethodDeclaration(catchClause);
+	}
+	
+	private MethodDeclaration findMethodForCatch(CatchClause catchClause) {
 		return (MethodDeclaration) findParentMethodDeclaration(catchClause);
 	}
 	
