@@ -42,6 +42,7 @@ public class DetectException extends AbstractHandler {
 	private void detectInProjects(IProject[] projects) {
 		for(IProject project : projects) {
 			System.out.println("DETECTING IN: " + project.getName());
+			SampleHandler.printMessage("DETECTING IN: " + project.getName());
 //			findSubTypes(project, "tryCatchPolymorphism.SuperInterface");
 			ExceptionFinder exceptionFinder = new ExceptionFinder();
 			try {
