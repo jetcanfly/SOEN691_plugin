@@ -162,7 +162,12 @@ public class MethodInvocationVisitor extends ASTVisitor {
 				parameters.add(type.getBinaryName());
 			}
 			for(IType type : iTypesSet) {
+				/*
+				 * get method which has same name and parameters because 
+				 * there might be same name method with different parameters.
+				 */
 				IMethod overrideMethod = type.getMethod(iMethodBinding.getName(), parameters.toArray(new String[] {}));
+//				ICompilationUnit unit = (ICompilationUnit) overrideMethod.getAncestor(IJavaElement.COMPILATION_UNIT);
 				/*
 				 * if it throws any exception, directly add it to TrySet.
 				 * 
@@ -174,7 +179,7 @@ public class MethodInvocationVisitor extends ASTVisitor {
 						// It's from source code. For UnresolvedClassTypeSignature, will be 
 						// start with a "Q"
 						if(ex.indexOf(";") != -1) {
-							ex = ex.substring(0, ex.length());
+							ex = ex.substring(0, ex.length()-1);
 						}
 						exceptionTryHashSet.add(ex.substring(1));  
 					}
