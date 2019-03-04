@@ -24,7 +24,7 @@ public class ExceptionFinder {
 	public void findExceptions(IProject project) throws JavaModelException {
 		this.project = project;
 		IPackageFragment[] packages = JavaCore.create(project).getPackageFragments();
-
+		
 		for(IPackageFragment mypackage : packages){
 			checkExceptions(mypackage);
 		}
@@ -44,8 +44,28 @@ public class ExceptionFinder {
 			parsedCompilationUnit.accept(logAndThrowVistor);
 			printLogAndThrowExceptions(logAndThrowVistor);
 			parsedCompilationUnit.accept(multipleException);
-//			printInformation(packageFragment, unit);
-			printMultipleExceptions(multipleException);
+//			printMultipleExceptions(multipleException);
+			printMultipleExceptions(multipleException,parsedCompilationUnit);
+		} 
+	}
+	
+	private void printMultipleExceptions(MultipleThrowsVisitor visitor, CompilationUnit compilationunit) {
+//		TypeDeclaration typeDec = (TypeDeclaration)compilationunit.types().get(0);
+//		if(visitor.getMethodName().size()>0) {
+//			SampleHandler.printMessage("Class:+++ "+typeDec.getName());
+//			System.out.println("Class:+++ "+typeDec.getName());
+//		}
+		for(MethodDeclaration method:visitor.getMethodName()) {
+			SampleHandler.printMessage("Method: "+method.getName());
+			System.out.println("Method: "+method.getName());
+			SampleHandler.printMessage("Exception Names: ");
+			System.out.println("Exception Names: ");
+			for(Object type:method.thrownExceptionTypes()) {
+				SampleHandler.printMessage(type.toString());
+				System.out.println(type.toString());
+			}
+			System.out.print("\n");
+			SampleHandler.printMessage("");
 		}
 	}
 	
@@ -57,32 +77,6 @@ public class ExceptionFinder {
 			System.out.println("find method suffers from Log and Throw: \n" + methodDeclaration.toString());
 			SampleHandler.printMessage(catchClause.toString());
 			System.out.println(catchClause.toString());
-		}
-	}
-	
-	
-	private void printInformation(IPackageFragment packageName, ICompilationUnit unit) {
-		System.out.println("Package: " + packageName.getElementName());
-		SampleHandler.printMessage("Package: " + packageName.getElementName());
-		System.out.println("Class: " + unit.getElementName());
-		SampleHandler.printMessage("Class: " + (unit.getElementName()));
-	}
-	
-	
-	private void printMultipleExceptions(MultipleThrowsVisitor visitor) {
-		List<List<Type>> exceptionNames = visitor.getMultipleException();
-		List<SimpleName> methodNames = visitor.getMethodName();
-		for(int i=0; i<methodNames.size();i++) {
-			SampleHandler.printMessage("Method: "+methodNames.get(i).toString());
-			System.out.println("Method: "+methodNames.get(i).toString());
-			SampleHandler.printMessage("Exception Names: ");
-			System.out.println("Exception Names: ");
-			for(Object type:exceptionNames.get(i)) {
-				SampleHandler.printMessage(type.toString());
-				System.out.println(type.toString());
-			}
-			System.out.print("\n");
-			SampleHandler.printMessage("");
 		}
 	}
 	
