@@ -38,10 +38,14 @@ public class ExceptionFinder {
 
 //			ExceptionVisitor exceptionVisitor = new ExceptionVisitor(this.methodException, project);
 			LogAndThrowVisitor logAndThrowVistor = new LogAndThrowVisitor();
+			MultipleThrowsVisitor multipleException  = new MultipleThrowsVisitor();
 //			parsedCompilationUnit.accept(exceptionVisitor);
 //			printOverCatchExceptions(exceptionVisitor);
 			parsedCompilationUnit.accept(logAndThrowVistor);
 			printLogAndThrowExceptions(logAndThrowVistor);
+			parsedCompilationUnit.accept(multipleException);
+//			printInformation(packageFragment, unit);
+			printMultipleExceptions(multipleException);
 		}
 	}
 	
@@ -53,14 +57,6 @@ public class ExceptionFinder {
 			System.out.println("find method suffers from Log and Throw: \n" + methodDeclaration.toString());
 			SampleHandler.printMessage(catchClause.toString());
 			System.out.println(catchClause.toString());
-
-			ExceptionVisitor exceptionVisitor = new ExceptionVisitor(this.methodException, project);
-			MultipleThrowsVisitor multipleException  = new MultipleThrowsVisitor();
-//			parsedCompilationUnit.accept(exceptionVisitor);
-//			printOverCatchExceptions(exceptionVisitor);
-			parsedCompilationUnit.accept(multipleException);
-			printInformation(packageFragment, unit);
-			printMultipleExceptions(multipleException);
 		}
 	}
 	
