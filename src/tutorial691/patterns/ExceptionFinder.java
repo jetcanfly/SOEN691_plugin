@@ -2,6 +2,7 @@ package tutorial691.patterns;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.JavaModelException;
@@ -9,6 +10,8 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import tutorial691.handlers.SampleHandler;
 import tutorial691.visitors.ExceptionVisitor;
+import tutorial691.visitors.LogAndThrowVisitor;
+import tutorial691.visitors.MultipleThrowsVisitor;
 
 import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.dom.*;
@@ -22,7 +25,7 @@ public class ExceptionFinder {
 	public void findExceptions(IProject project) throws JavaModelException {
 		this.project = project;
 		IPackageFragment[] packages = JavaCore.create(project).getPackageFragments();
-
+		
 		for(IPackageFragment mypackage : packages){
 			this.packageFragment = mypackage;
 			checkExceptions(mypackage);
@@ -34,9 +37,56 @@ public class ExceptionFinder {
 			CompilationUnit parsedCompilationUnit = parse(unit);
 			
 			// We should build 3 Visitors here and use them one by one.
+
 			ExceptionVisitor exceptionVisitor = new ExceptionVisitor(this.methodException, project);
 			parsedCompilationUnit.accept(exceptionVisitor);
 			printOverCatchExceptions(exceptionVisitor, parsedCompilationUnit);
+
+			LogAndThrowVisitor logAndThrowVistor = new LogAndThrowVisitor();
+			parsedCompilationUnit.accept(logAndThrowVistor);
+			printLogAndThrowExceptions(logAndThrowVistor);
+			
+			MultipleThrowsVisitor multipleException  = new MultipleThrowsVisitor();
+			parsedCompilationUnit.accept(multipleException);
+			printMultipleExceptions(multipleException,parsedCompilationUnit);
+		} 
+	}
+	
+	private void printMultipleExceptions(MultipleThrowsVisitor visitor, CompilationUnit compilationunit) {
+
+		if(visitor.getMethodName().size() != 0) {
+			SampleHandler.printMessage("+++++++++Find multiple exception throw+++++++++");
+			System.out.println("+++++++++Find multiple exception throw+++++++++");
+			SampleHandler.printMessage("find multiple exception throw in project: \n" + this.project.getName());
+			System.out.println("find multiple exception throw in project: \n" + this.project.getName());
+			SampleHandler.printMessage("find multiple exception throw in package: \n" + this.packageFragment.getElementName());
+			System.out.println("find multiple exception throw in package: \n" + this.packageFragment.getElementName());
+		}
+		for(MethodDeclaration method:visitor.getMethodName()) {
+			SampleHandler.printMessage("find in class: \n" + ((TypeDeclaration)(method.getParent())).getName());
+			System.out.println("find in class: \n" + ((TypeDeclaration)(method.getParent())).getName());
+			SampleHandler.printMessage("Method: "+method.getName());
+			System.out.println("Method: "+method.getName());
+			SampleHandler.printMessage("Exception Names: ");
+			System.out.println("Exception Names: ");
+			for(Object type:method.thrownExceptionTypes()) {
+				SampleHandler.printMessage(type.toString());
+				System.out.println(type.toString());
+			}
+			System.out.print("+++++++++++++++++++++++++\n\n");
+			SampleHandler.printMessage("+++++++++++++++++++++++++\n\n");
+		}
+	}
+	
+	private void printLogAndThrowExceptions(LogAndThrowVisitor visitor) {
+		for (CatchClause catchClause : visitor.getLogAndThrowCathesCatchClauses()) {
+			MethodDeclaration methodDeclaration = findMethodForCatch(catchClause);
+			
+			SampleHandler.printMessage("find method suffers from Log and Throw: \n" + methodDeclaration.toString());
+			System.out.println("find method suffers from Log and Throw: \n" + methodDeclaration.toString());
+			SampleHandler.printMessage(catchClause.toString());
+			System.out.println(catchClause.toString());
+
 		}
 	}
 	
@@ -61,8 +111,8 @@ public class ExceptionFinder {
 			System.out.println("try-catch statement: \n");
 			SampleHandler.printMessage(statement.toString());
 			System.out.println(statement.toString());
-			SampleHandler.printMessage("==============================================");
-			System.out.println("==============================================");
+			SampleHandler.printMessage("==============================================\n\n");
+			System.out.println("==============================================\n\n");
 			
 		}
 	}
@@ -76,6 +126,10 @@ public class ExceptionFinder {
 	}
 	
 	private MethodDeclaration findMethodForCatch(TryStatement catchClause) {
+		return (MethodDeclaration) findParentMethodDeclaration(catchClause);
+	}
+	
+	private MethodDeclaration findMethodForCatch(CatchClause catchClause) {
 		return (MethodDeclaration) findParentMethodDeclaration(catchClause);
 	}
 	
