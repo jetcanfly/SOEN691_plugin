@@ -2,6 +2,7 @@ package tutorial691.patterns;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.JavaModelException;
@@ -10,6 +11,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import tutorial691.handlers.SampleHandler;
 import tutorial691.visitors.ExceptionVisitor;
 import tutorial691.visitors.LogAndThrowVisitor;
+import tutorial691.visitors.MultipleThrowsVisitor;
 
 import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.dom.*;
@@ -22,7 +24,7 @@ public class ExceptionFinder {
 	public void findExceptions(IProject project) throws JavaModelException {
 		this.project = project;
 		IPackageFragment[] packages = JavaCore.create(project).getPackageFragments();
-
+		
 		for(IPackageFragment mypackage : packages){
 			checkExceptions(mypackage);
 		}
@@ -33,12 +35,37 @@ public class ExceptionFinder {
 			CompilationUnit parsedCompilationUnit = parse(unit);
 			
 			// We should build 3 Visitors here and use them one by one.
+
 //			ExceptionVisitor exceptionVisitor = new ExceptionVisitor(this.methodException, project);
 			LogAndThrowVisitor logAndThrowVistor = new LogAndThrowVisitor();
+			MultipleThrowsVisitor multipleException  = new MultipleThrowsVisitor();
 //			parsedCompilationUnit.accept(exceptionVisitor);
 //			printOverCatchExceptions(exceptionVisitor);
 			parsedCompilationUnit.accept(logAndThrowVistor);
 			printLogAndThrowExceptions(logAndThrowVistor);
+			parsedCompilationUnit.accept(multipleException);
+//			printMultipleExceptions(multipleException);
+			printMultipleExceptions(multipleException,parsedCompilationUnit);
+		} 
+	}
+	
+	private void printMultipleExceptions(MultipleThrowsVisitor visitor, CompilationUnit compilationunit) {
+//		TypeDeclaration typeDec = (TypeDeclaration)compilationunit.types().get(0);
+//		if(visitor.getMethodName().size()>0) {
+//			SampleHandler.printMessage("Class:+++ "+typeDec.getName());
+//			System.out.println("Class:+++ "+typeDec.getName());
+//		}
+		for(MethodDeclaration method:visitor.getMethodName()) {
+			SampleHandler.printMessage("Method: "+method.getName());
+			System.out.println("Method: "+method.getName());
+			SampleHandler.printMessage("Exception Names: ");
+			System.out.println("Exception Names: ");
+			for(Object type:method.thrownExceptionTypes()) {
+				SampleHandler.printMessage(type.toString());
+				System.out.println(type.toString());
+			}
+			System.out.print("\n");
+			SampleHandler.printMessage("");
 		}
 	}
 	
