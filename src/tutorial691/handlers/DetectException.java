@@ -22,8 +22,6 @@ import tutorial691.patterns.ExceptionFinder;
 
 public class DetectException extends AbstractHandler {
 	
-	
-
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
@@ -64,26 +62,14 @@ public class DetectException extends AbstractHandler {
 	static public HashSet<IType> findSubTypes(IProject project, String superName) {
 		IJavaProject jProject = JavaCore.create(project);
 		HashSet<IType> iTypesSet = new HashSet<IType>();
-//		IType[] iTypes = null;
 		try {
 			IType iType = jProject.findType(superName);
-//			ITypeHierarchy ih = iType.newTypeHierarchy(jProject, new NullProgressMonitor());
-//			if(ih != null) {
-//				iTypes = ih.getAllSubtypes(iType);
-////				IType[] iTypes2 = ih.getAllTypes();
-////				IType[] iTypes3 = ih.getImplementingClasses(iType);
-////				IType[] iTypes4 = ih.getSupertypes(iType);
-//				int a = 1;
-//			}
 			IPackageFragment[] packages = jProject.getPackageFragments();
 			for(IPackageFragment mypackage : packages){
 				if(mypackage.getCompilationUnits().length != 0) {
 					ITypeHierarchy ih = iType.newTypeHierarchy(mypackage.getCompilationUnits(), new NullProgressMonitor());
 					if(ih != null) {
 						IType[] iTypes = ih.getAllSubtypes(iType);
-//						IType[] iTypes2 = ih.getAllTypes();
-//						IType[] iTypes3 = ih.getImplementingClasses(iType);
-//						IType[] iTypes4 = ih.getSupertypes(iType);
 						for(IType t: iTypes) {
 							iTypesSet.add(t);
 						}
@@ -92,7 +78,6 @@ public class DetectException extends AbstractHandler {
 			}
 			
 		} catch (JavaModelException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 		return iTypesSet;

@@ -7,7 +7,6 @@ import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IClassFile;
-//import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
@@ -33,7 +32,6 @@ import tutorial691.patterns.ExceptionFinder;
 public class MethodInvocationVisitor extends ASTVisitor {
 	
 	public HashMap<String, HashSet<String>> methodException;
-//	public HashSet<String> exceptionSet = new HashSet<String>();
 	public HashSet<String> exceptionTryHashSet = new HashSet<String>();
 	public CompilationUnit sourceFileAST;
 	private IProject project;
@@ -63,10 +61,6 @@ public class MethodInvocationVisitor extends ASTVisitor {
 	}
 	
 	public boolean visit(MethodInvocation node) {
-		
-//		SimpleNameVisitor sn = new SimpleNameVisitor();  
-//		node.accept(sn);
-		
 		IMethodBinding iMethodBinding = node.resolveMethodBinding();
 		IMethodBinding iMethodDec = iMethodBinding.getMethodDeclaration();
 		String classNameString = iMethodDec.getDeclaringClass().getQualifiedName();
@@ -75,7 +69,6 @@ public class MethodInvocationVisitor extends ASTVisitor {
 			formalParameter += type.getName();
 		}
 		String methodName = node.getName().getFullyQualifiedName();
-//		String qualifiedName = iMethodBinding.getKey();
 		String qualifiedName = classNameString + "-" + methodName + "-" + formalParameter;  // to make sure it's unique
 		if(methodException.containsKey(qualifiedName) && methodException.get(qualifiedName) != null) {
 			return super.visit(node);  // this method has been traversed.
@@ -86,15 +79,12 @@ public class MethodInvocationVisitor extends ASTVisitor {
 		methodException.put(qualifiedName, null);
 		
 		HashSet<String> exceptionSet = new HashSet<String>();
-//		iMethodBinding.getName();
 		for(ITypeBinding type: iMethodBinding.getExceptionTypes()) {  // If method throws exception
 			String exception = type.getName();
 			exceptionSet.add(exception);
 		}
 		
-//		IMethodBinding binding = (IMethodBinding) node.getName().resolveBinding();
 		ICompilationUnit unit = (ICompilationUnit) iMethodBinding.getJavaElement().getAncestor( IJavaElement.COMPILATION_UNIT );
-//		IMethod iMethod = (IMethod) iMethodBinding.getJavaElement();
 		if(unit != null) {
 			// if not find source code. skip Javadoc, skip traverse
 			// We mostly care methods in target project. Third party without source code wouldn't be handled.
@@ -107,9 +97,7 @@ public class MethodInvocationVisitor extends ASTVisitor {
 					if(tag.getTagName() == TagElement.TAG_THROWS || 
 							tag.getTagName() == TagElement.TAG_EXCEPTION) {
 						Object docName = tag.fragments().get(0);
-//						for(Object docName: tag.fragments()) {
 						exceptionSet.add(((SimpleName)docName).getFullyQualifiedName());
-//						}
 					}
 				}
 			}
@@ -152,16 +140,6 @@ public class MethodInvocationVisitor extends ASTVisitor {
 		return (MethodDeclaration)cUnit.findDeclaringNode(binding.getKey());
 	}
 	
-//	public MethodDeclaration FindDeclarationInSource(IClassFile unit, IMethodBinding binding) {
-//		CompilationUnit cUnit;
-//		try {
-//			cUnit = ExceptionFinder.parse(unit.getSource());
-//		} catch (JavaModelException e) {
-//			return null;
-//		}
-//		return (MethodDeclaration)cUnit.findDeclaringNode(binding.getKey());
-//	}
-	
 	public void addExceptionThroughPolymorphism(String classNameString, IMethodBinding iMethodDec, 
 			IMethodBinding iMethodBinding) {
 		
@@ -192,14 +170,12 @@ public class MethodInvocationVisitor extends ASTVisitor {
 				 * there might be same name method with different parameters.
 				 */
 				IMethod overrideMethod = type.getMethod(iMethodBinding.getName(), parameters.toArray(new String[] {}));
-//				ICompilationUnit unit = (ICompilationUnit) overrideMethod.getAncestor(IJavaElement.COMPILATION_UNIT);
 				/*
 				 * if it throws any exception, directly add it to TrySet.
 				 * 
 				 */
 				try {
 					for(String ex: overrideMethod.getExceptionTypes()) { 
-//						String[] tmp = Signature.getTypeParameters(ex);
 						
 						// It's from source code. For UnresolvedClassTypeSignature, will be 
 						// start with a "Q"
@@ -208,12 +184,8 @@ public class MethodInvocationVisitor extends ASTVisitor {
 						}
 						exceptionTryHashSet.add(ex.substring(1));  
 					}
-//					overrideMethod.getAttachedJavadoc(null);  
-//					This should be used only for binary elements. 
-//					Source elements will always return null.
 				} catch (JavaModelException e) {
-					// TODO Auto-generated catch block
-//					e.printStackTrace();
+					// do nothing
 				}
 			}
 		}
