@@ -55,6 +55,10 @@ public class ExceptionFinder {
 			System.out.println("find in class: \n" + ((TypeDeclaration)(methodDeclaration.getParent())).getName());
 			SampleHandler.printMessage("find in method: \n" + methodDeclaration.getName());
 			System.out.println("find in method: \n" + methodDeclaration.getName());
+			SampleHandler.printMessage("exceptions in try clause: \n" + visitor.exceptionTryHashSet.toString());
+			System.out.println("exceptions in try clause: \n" + visitor.exceptionTryHashSet.toString());
+			SampleHandler.printMessage("try-catch statement: \n");
+			System.out.println("try-catch statement: \n");
 			SampleHandler.printMessage(statement.toString());
 			System.out.println(statement.toString());
 			SampleHandler.printMessage("==============================================");
@@ -79,6 +83,14 @@ public class ExceptionFinder {
 		ASTParser parser = ASTParser.newParser(AST.JLS11);
 		parser.setKind(ASTParser.K_COMPILATION_UNIT);
 		parser.setSource(unit);
+		parser.setResolveBindings(true);
+		return (CompilationUnit) parser.createAST(null); // parse
+	}
+	
+	public static CompilationUnit parse(String classfile) {
+		ASTParser parser = ASTParser.newParser(AST.JLS11);
+		parser.setKind(ASTParser.K_COMPILATION_UNIT);
+		parser.setSource(classfile.toCharArray());
 		parser.setResolveBindings(true);
 		return (CompilationUnit) parser.createAST(null); // parse
 	}

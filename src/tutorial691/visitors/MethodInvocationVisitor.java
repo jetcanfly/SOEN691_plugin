@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.jdt.core.IClassFile;
 //import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -13,6 +14,8 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -69,7 +72,7 @@ public class MethodInvocationVisitor extends ASTVisitor {
 		String classNameString = iMethodDec.getDeclaringClass().getQualifiedName();
 		String formalParameter = "";
 		for(ITypeBinding type: iMethodDec.getParameterTypes()) {
-			formalParameter += type.getQualifiedName();
+			formalParameter += type.getName();
 		}
 		String methodName = node.getName().getFullyQualifiedName();
 //		String qualifiedName = iMethodBinding.getKey();
@@ -119,6 +122,23 @@ public class MethodInvocationVisitor extends ASTVisitor {
 			}
 		}
 		
+		// for methodcall that only has classfile not source code.
+		IClassFile classFile = (IClassFile)iMethodBinding.getJavaElement().getAncestor( IJavaElement.CLASS_FILE );
+		if(classFile != null) {
+			CompilationUnit unit2 = null;
+			try {
+				unit2 = ExceptionFinder.parse(classFile.getSource());
+			} catch (JavaModelException e) {
+				System.out.println("cannot parse classfile to ASTTree");
+			}
+			MethodDeclarationVisitor visitor = new MethodDeclarationVisitor();
+			visitor.setClassName(classNameString);
+			visitor.setMethodName(methodName);
+			visitor.setParameterName(formalParameter);
+			unit2.accept(visitor);
+			exceptionSet.addAll(visitor.exceptionSet);
+		}
+		
 		exceptionTryHashSet.addAll(exceptionSet);
 		methodException.put(qualifiedName, exceptionSet);
 		
@@ -128,14 +148,19 @@ public class MethodInvocationVisitor extends ASTVisitor {
 	}
 	
 	public MethodDeclaration FindDeclarationInSource(ICompilationUnit unit, IMethodBinding binding) {
-//		ASTParser parser = ASTParser.newParser(AST.JLS11);
-//		parser.setKind(ASTParser.K_COMPILATION_UNIT);
-//		parser.setSource(unit);
-//		parser.setResolveBindings(true);
-//		CompilationUnit cu = (CompilationUnit) parser.createAST(null);
 		CompilationUnit cUnit = ExceptionFinder.parse(unit);
 		return (MethodDeclaration)cUnit.findDeclaringNode(binding.getKey());
 	}
+	
+//	public MethodDeclaration FindDeclarationInSource(IClassFile unit, IMethodBinding binding) {
+//		CompilationUnit cUnit;
+//		try {
+//			cUnit = ExceptionFinder.parse(unit.getSource());
+//		} catch (JavaModelException e) {
+//			return null;
+//		}
+//		return (MethodDeclaration)cUnit.findDeclaringNode(binding.getKey());
+//	}
 	
 	public void addExceptionThroughPolymorphism(String classNameString, IMethodBinding iMethodDec, 
 			IMethodBinding iMethodBinding) {

@@ -16,7 +16,7 @@ import org.eclipse.ui.activities.IActivityListener;
 public class ExceptionVisitor extends ASTVisitor{
 	HashSet<TryStatement> overCatchTryStatement = new HashSet<>();
 	HashSet<String> exceptionCatchHashSet = new HashSet<>();
-	HashSet<String> exceptionTryHashSet = new HashSet<>();
+	public HashSet<String> exceptionTryHashSet = new HashSet<>();
 	HashMap<String, HashSet<String>> methodException;  // Given
 	public IProject project;
 	
@@ -44,7 +44,6 @@ public class ExceptionVisitor extends ASTVisitor{
 		if(isOverCatch()) {
 			overCatchTryStatement.add(node);
 		}
-		clear();
 		return super.visit(node);
 	}
 	
@@ -60,11 +59,6 @@ public class ExceptionVisitor extends ASTVisitor{
 			}
 		}
 		return count < exceptionCatchHashSet.size()? true: false;
-	}
-	
-	private void clear() {
-		exceptionTryHashSet.clear();
-		exceptionCatchHashSet.clear();
 	}
 
 }
