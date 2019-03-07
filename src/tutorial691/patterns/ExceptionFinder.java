@@ -62,13 +62,13 @@ public class ExceptionFinder {
 			parsedCompilationUnit.accept(exceptionVisitor);
 			printOverCatchExceptions(exceptionVisitor, parsedCompilationUnit);
 
-//			LogAndThrowVisitor logAndThrowVistor = new LogAndThrowVisitor();
-//			parsedCompilationUnit.accept(logAndThrowVistor);
-//			printLogAndThrowExceptions(logAndThrowVistor);
-//			
-//			MultipleThrowsVisitor multipleException  = new MultipleThrowsVisitor();
-//			parsedCompilationUnit.accept(multipleException);
-//			printMultipleExceptions(multipleException,parsedCompilationUnit);
+			LogAndThrowVisitor logAndThrowVistor = new LogAndThrowVisitor();
+			parsedCompilationUnit.accept(logAndThrowVistor);
+			printLogAndThrowExceptions(logAndThrowVistor);
+			
+			MultipleThrowsVisitor multipleException  = new MultipleThrowsVisitor();
+			parsedCompilationUnit.accept(multipleException);
+			printMultipleExceptions(multipleException,parsedCompilationUnit);
 		} 
 	}
 	
