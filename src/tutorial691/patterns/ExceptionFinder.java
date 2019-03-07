@@ -34,6 +34,7 @@ public class ExceptionFinder {
 	IProject project = null;
 	IPackageFragment packageFragment = null;
 	static public IJavaProject jProject = null;
+	static public HashMap<String, HashSet<IType>> hierachyMap = new HashMap<String, HashSet<IType>>();
 	
 	public void findExceptions(IProject project) throws JavaModelException {
 		this.project = project;
@@ -53,18 +54,21 @@ public class ExceptionFinder {
 			CompilationUnit parsedCompilationUnit = parse(unit);
 			
 			// We should build 3 Visitors here and use them one by one.
-
-//			ExceptionVisitor exceptionVisitor = new ExceptionVisitor(this.methodException, project);
-//			parsedCompilationUnit.accept(exceptionVisitor);
-//			printOverCatchExceptions(exceptionVisitor, parsedCompilationUnit);
+			SampleHandler.printMessage("	checking: " + parsedCompilationUnit.getJavaElement().getElementName());
+			System.out.println("	checking: " + parsedCompilationUnit.getJavaElement().getElementName());
+//		
+			
+			ExceptionVisitor exceptionVisitor = new ExceptionVisitor(this.methodException, project);
+			parsedCompilationUnit.accept(exceptionVisitor);
+			printOverCatchExceptions(exceptionVisitor, parsedCompilationUnit);
 
 //			LogAndThrowVisitor logAndThrowVistor = new LogAndThrowVisitor();
 //			parsedCompilationUnit.accept(logAndThrowVistor);
 //			printLogAndThrowExceptions(logAndThrowVistor);
 //			
-			MultipleThrowsVisitor multipleException  = new MultipleThrowsVisitor();
-			parsedCompilationUnit.accept(multipleException);
-			printMultipleExceptions(multipleException,parsedCompilationUnit);
+//			MultipleThrowsVisitor multipleException  = new MultipleThrowsVisitor();
+//			parsedCompilationUnit.accept(multipleException);
+//			printMultipleExceptions(multipleException,parsedCompilationUnit);
 		} 
 	}
 	
@@ -117,6 +121,10 @@ public class ExceptionFinder {
 			SampleHandler.printMessage("find overCatch in package: \n" + this.packageFragment.getElementName());
 			System.out.println("find overCatch in package: \n" + this.packageFragment.getElementName());
 		}
+//		else {
+//			SampleHandler.printMessage("	checked: " + parsedCompilationUnit.getJavaElement().getElementName());
+//			System.out.println("	checked: " + parsedCompilationUnit.getJavaElement().getElementName());
+//		}
 		for(Map.Entry<TryStatement, String> entry: visitor.getTryStatements().entrySet()) {
 			TryStatement statement = entry.getKey();
 			String tryException = entry.getValue();
@@ -180,10 +188,18 @@ public class ExceptionFinder {
 	 * So I traverse every Package that is actually in target workspace to get a complete set of subTypes.
 	 */
 	static public HashSet<IType> findSubTypes(IProject project, String superName) {
+		System.out.println("	findSubTypes " + superName);
+		if(hierachyMap.containsKey(superName)) {
+			return hierachyMap.get(superName);
+		}
+		
 		if(jProject == null) {
 			jProject = JavaCore.create(project);
 		}
 		HashSet<IType> iTypesSet = new HashSet<IType>();
+		if(!superName.startsWith("io.bootique.")) {  // a hardcode for efficiency.
+			return iTypesSet;
+		}
 		try {
 			IType iType = jProject.findType(superName);
 			IPackageFragment[] packages = jProject.getPackageFragments();
@@ -202,6 +218,8 @@ public class ExceptionFinder {
 		} catch (JavaModelException e1) {
 			e1.printStackTrace();
 		}
+		System.out.println("	over findSubTypes " + superName);
+		hierachyMap.put(superName, iTypesSet);
 		return iTypesSet;
 	}
 }

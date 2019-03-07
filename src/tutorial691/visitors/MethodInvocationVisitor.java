@@ -65,9 +65,11 @@ public class MethodInvocationVisitor extends ASTVisitor {
 	}
 	
 	public boolean visit(MethodInvocation node) {
-		if(this.tryStatement != findTryStatementForMethodInvocation(node)){
+		if(findTryStatementForMethodInvocation(node) != null && 
+				this.tryStatement != findTryStatementForMethodInvocation(node)){
 			return super.visit(node);
 		}
+		System.out.println("		...." + node.getName());
 		IMethodBinding iMethodBinding = node.resolveMethodBinding();
 		IMethodBinding iMethodDec = iMethodBinding.getMethodDeclaration();
 		String classNameString = iMethodDec.getDeclaringClass().getQualifiedName();
@@ -96,25 +98,28 @@ public class MethodInvocationVisitor extends ASTVisitor {
 			// if not find source code. skip Javadoc, skip traverse
 			// We mostly care methods in target project. Third party without source code wouldn't be handled.
 			MethodDeclaration decl = FindDeclarationInSource(unit, iMethodBinding);
-			Javadoc doc = decl.getJavadoc();
-			if(doc != null) {	// If method throws exception in JavaDoc.
-				List<TagElement> tagList = doc.tags();
-				for(TagElement tag: tagList) {
-					// The tags @throws and @exception are synonyms.
-					if(tag.getTagName() == TagElement.TAG_THROWS || 
-							tag.getTagName() == TagElement.TAG_EXCEPTION) {
-						Object docName = tag.fragments().get(0);
-						exceptionSet.add(((SimpleName)docName).getFullyQualifiedName());
+			if(decl != null) {
+				Javadoc doc = decl.getJavadoc();
+				if(doc != null) {	// If method throws exception in JavaDoc.
+					List<TagElement> tagList = doc.tags();
+					for(TagElement tag: tagList) {
+						// The tags @throws and @exception are synonyms.
+						if(tag.getTagName() == TagElement.TAG_THROWS || 
+								tag.getTagName() == TagElement.TAG_EXCEPTION) {
+							Object docName = tag.fragments().get(0);
+							exceptionSet.add(((SimpleName)docName).getFullyQualifiedName());
+						}
 					}
 				}
-			}
-			// go into the method declaration body to find exception.
-			Block mBody = decl.getBody();
-			if(null != mBody && this.recursionLevel < 1) {
-				MethodInvocationVisitor methodInvocationVisitor = new MethodInvocationVisitor(methodException, this.project);
-				methodInvocationVisitor.recursionLevel = this.recursionLevel + 1;
-				mBody.accept(methodInvocationVisitor);
-				exceptionSet.addAll(methodInvocationVisitor.exceptionTryHashSet);
+
+				// go into the method declaration body to find exception.
+				Block mBody = decl.getBody();
+				if(null != mBody && this.recursionLevel < 1) {
+					MethodInvocationVisitor methodInvocationVisitor = new MethodInvocationVisitor(methodException, this.project);
+					methodInvocationVisitor.recursionLevel = this.recursionLevel + 1;
+					mBody.accept(methodInvocationVisitor);
+					exceptionSet.addAll(methodInvocationVisitor.exceptionTryHashSet);
+				}
 			}
 		}
 		
@@ -124,15 +129,16 @@ public class MethodInvocationVisitor extends ASTVisitor {
 			CompilationUnit unit2 = null;
 			try {
 				unit2 = ExceptionFinder.parse(classFile.getSource());
-			} catch (JavaModelException e) {
-				System.out.println("cannot parse classfile to ASTTree");
+				MethodDeclarationVisitor visitor = new MethodDeclarationVisitor();
+				visitor.setClassName(classNameString);
+				visitor.setMethodName(methodName);
+				visitor.setParameterName(formalParameter);
+				unit2.accept(visitor);
+				exceptionSet.addAll(visitor.exceptionSet);
 			}
-			MethodDeclarationVisitor visitor = new MethodDeclarationVisitor();
-			visitor.setClassName(classNameString);
-			visitor.setMethodName(methodName);
-			visitor.setParameterName(formalParameter);
-			unit2.accept(visitor);
-			exceptionSet.addAll(visitor.exceptionSet);
+			catch (Exception e) {
+				System.out.println("cannot parse classfile " + classFile.getElementName());
+			}
 		}
 		
 		exceptionTryHashSet.addAll(exceptionSet);
@@ -201,7 +207,13 @@ public class MethodInvocationVisitor extends ASTVisitor {
 	}
 	
 	private ASTNode findTryStatementForMethodInvocation(ASTNode node) {
+		if(node == null || node.getParent() == null) {
+			return null;
+		}
 		if(node.getParent().getNodeType() == ASTNode.TRY_STATEMENT) {
+			if(((TryStatement)node.getParent()).getFinally() == node) {
+				return null;
+			}
 			return node.getParent();
 		} else {
 			return findTryStatementForMethodInvocation(node.getParent());

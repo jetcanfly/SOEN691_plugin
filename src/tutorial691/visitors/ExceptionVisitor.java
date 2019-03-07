@@ -36,6 +36,9 @@ public class ExceptionVisitor extends ASTVisitor{
 		for(CatchClause catchClause: clauseList) {
 			catchClause.accept(catchVisitor);
 		}
+		if(exceptionCatchHashSet.size() == 0) {  // mustn't be a overCatch
+			return super.visit(node);
+		}
 		
 		Block tryBlock = node.getBody();
 		MethodInvocationVisitor methodInvocationVisitor = new MethodInvocationVisitor(methodException, project);
