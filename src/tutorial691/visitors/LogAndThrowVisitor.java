@@ -1,9 +1,12 @@
 package tutorial691.visitors;
 
 import java.util.HashSet;
+import java.util.List;
 
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CatchClause;
+import org.eclipse.jdt.core.dom.Statement;
 
 
 public class LogAndThrowVisitor extends ASTVisitor{
@@ -23,26 +26,28 @@ public class LogAndThrowVisitor extends ASTVisitor{
 	}
 	
 	private boolean isLogAndThrow(CatchClause node) {
-	    
-		String body = node.getBody().toString();		
-		
 		boolean throwflag = false;
 		boolean printstacktraceflag = false;
 		boolean logflag = false;
 		boolean printflag = false;
-
-		if(containsIgnoreCase(body, "throw ")){
-			throwflag = true;
-		}
-		if(containsIgnoreCase(body, "printStackTrace")) {
-			printstacktraceflag = true;
-		}
-		if(containsIgnoreCase(body, "print")){
-			printflag = true;
-		}
-		if( (containsIgnoreCase(body, "log") ||
-				containsIgnoreCase(body, "logger"))) {
-				logflag = true;
+		
+		List<Statement> statements = node.getBody().statements();		
+		for (Statement statement : statements) {
+			System.out.println(statement.getClass());
+			if (statement.getNodeType() == ASTNode.THROW_STATEMENT) {
+				throwflag = true;
+			} else {
+				if(containsIgnoreCase(statement.toString(), "printStackTrace")) {
+					printstacktraceflag = true;
+				}
+				if(containsIgnoreCase(statement.toString(), "print")){
+					printflag = true;
+				}
+				if( (containsIgnoreCase(statement.toString(), "log") ||
+						containsIgnoreCase(statement.toString(), "logger"))) {
+						logflag = true;
+				}
+			}
 		}
 		
 		if (logflag || printstacktraceflag || printflag) {
