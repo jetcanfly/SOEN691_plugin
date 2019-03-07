@@ -14,6 +14,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Block;
@@ -25,6 +26,7 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.TagElement;
+import org.eclipse.jdt.core.dom.TryStatement;
 
 import tutorial691.handlers.DetectException;
 import tutorial691.patterns.ExceptionFinder;
@@ -35,6 +37,8 @@ public class MethodInvocationVisitor extends ASTVisitor {
 	public HashSet<String> exceptionTryHashSet = new HashSet<String>();
 	public CompilationUnit sourceFileAST;
 	private IProject project;
+	public int recursionLevel = 0;  // set a recursion threshold in case too much recursion leads to memory running-out
+	public TryStatement tryStatement = null;
 	
 	public IProject getProject() {
 		return project;
@@ -61,6 +65,9 @@ public class MethodInvocationVisitor extends ASTVisitor {
 	}
 	
 	public boolean visit(MethodInvocation node) {
+		if(this.tryStatement != findTryStatementForMethodInvocation(node)){
+			return super.visit(node);
+		}
 		IMethodBinding iMethodBinding = node.resolveMethodBinding();
 		IMethodBinding iMethodDec = iMethodBinding.getMethodDeclaration();
 		String classNameString = iMethodDec.getDeclaringClass().getQualifiedName();
@@ -103,8 +110,9 @@ public class MethodInvocationVisitor extends ASTVisitor {
 			}
 			// go into the method declaration body to find exception.
 			Block mBody = decl.getBody();
-			if(null != mBody) {
+			if(null != mBody && this.recursionLevel < 1) {
 				MethodInvocationVisitor methodInvocationVisitor = new MethodInvocationVisitor(methodException, this.project);
+				methodInvocationVisitor.recursionLevel = this.recursionLevel + 1;
 				mBody.accept(methodInvocationVisitor);
 				exceptionSet.addAll(methodInvocationVisitor.exceptionTryHashSet);
 			}
@@ -158,7 +166,7 @@ public class MethodInvocationVisitor extends ASTVisitor {
 		So we go through all the methods which has same method signature of a's subTypes.
 		*/
 		
-		HashSet<IType> iTypesSet = DetectException.findSubTypes(project, classNameString);
+		HashSet<IType> iTypesSet = ExceptionFinder.findSubTypes(project, classNameString);
 		if(iTypesSet.size() != 0) {
 			ArrayList<String> parameters = new ArrayList<String>();
 			for(ITypeBinding type: iMethodDec.getParameterTypes()) {
@@ -190,6 +198,14 @@ public class MethodInvocationVisitor extends ASTVisitor {
 			}
 		}
 		
+	}
+	
+	private ASTNode findTryStatementForMethodInvocation(ASTNode node) {
+		if(node.getParent().getNodeType() == ASTNode.TRY_STATEMENT) {
+			return node.getParent();
+		} else {
+			return findTryStatementForMethodInvocation(node.getParent());
+		}
 	}
 
 }

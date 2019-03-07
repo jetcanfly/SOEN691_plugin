@@ -11,6 +11,7 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
@@ -58,6 +59,9 @@ public class MethodDeclarationVisitor extends ASTVisitor {
 		for(Object dec: node.parameters()) {
 			thisParaName += ((SingleVariableDeclaration)dec).getType().toString();
 		}
+		if(node.parameters().toString().contains("...")) {
+			thisParaName += "[]";
+		}
 		
 		if(!className.contains(thisClassName)
 				// sometimes we cannot get QualifiedName but only simple name for
@@ -78,9 +82,19 @@ public class MethodDeclarationVisitor extends ASTVisitor {
 				if(tag.getTagName() == TagElement.TAG_THROWS || 
 						tag.getTagName() == TagElement.TAG_EXCEPTION) {
 					Object docName = tag.fragments().get(0);
-//					for(Object docName: tag.fragments()) {
-					exceptionSet.add(((SimpleName)docName).getFullyQualifiedName());
-//					}
+					try {
+						if(docName instanceof SimpleName) {
+							exceptionSet.add(((SimpleName)docName).getFullyQualifiedName());
+						}
+						else if(docName instanceof QualifiedName) {
+							exceptionSet.add(((QualifiedName) docName).getFullyQualifiedName());
+						}
+					}
+					catch (Exception e) {
+						e.printStackTrace();
+						System.out.println("******encounter Javadoc problem in " +
+						thisClassName + " - " + thisMethodName + " - " + thisParaName);
+					}
 				}
 			}
 		}

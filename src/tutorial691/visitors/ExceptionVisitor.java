@@ -14,7 +14,7 @@ import org.eclipse.ui.activities.IActivityListener;
 
 
 public class ExceptionVisitor extends ASTVisitor{
-	HashSet<TryStatement> overCatchTryStatement = new HashSet<>();
+	HashMap<TryStatement, String> overCatchTryStatement = new HashMap<>();
 	HashSet<String> exceptionCatchHashSet = new HashSet<>();
 	public HashSet<String> exceptionTryHashSet = new HashSet<>();
 	HashMap<String, HashSet<String>> methodException;  // Given
@@ -39,15 +39,17 @@ public class ExceptionVisitor extends ASTVisitor{
 		
 		Block tryBlock = node.getBody();
 		MethodInvocationVisitor methodInvocationVisitor = new MethodInvocationVisitor(methodException, project);
+		methodInvocationVisitor.tryStatement = node;
 		tryBlock.accept(methodInvocationVisitor);
 		exceptionTryHashSet.addAll(methodInvocationVisitor.exceptionTryHashSet);
 		if(isOverCatch()) {
-			overCatchTryStatement.add(node);
+			overCatchTryStatement.put(node, exceptionTryHashSet.toString());
 		}
+		clear();
 		return super.visit(node);
 	}
 	
-	public HashSet<TryStatement> getTryStatements() {
+	public HashMap<TryStatement, String> getTryStatements() {
 		return overCatchTryStatement;
 	}
 	
@@ -60,5 +62,9 @@ public class ExceptionVisitor extends ASTVisitor{
 		}
 		return count < exceptionCatchHashSet.size()? true: false;
 	}
-
+	private void clear() {
+		exceptionTryHashSet.clear();
+		exceptionCatchHashSet.clear();
+	}
+	
 }
