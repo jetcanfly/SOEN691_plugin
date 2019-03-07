@@ -22,8 +22,8 @@ import tutorial691.patterns.ExceptionFinder;
 
 public class DetectException extends AbstractHandler {
 	
+	static public NullProgressMonitor nullProgressMonitor = new NullProgressMonitor();
 	
-
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
@@ -41,8 +41,8 @@ public class DetectException extends AbstractHandler {
 
 	private void detectInProjects(IProject[] projects) {
 		for(IProject project : projects) {
-			System.out.println("DETECTING IN: " + project.getName());
-			SampleHandler.printMessage("DETECTING IN: " + project.getName());
+			System.out.println("**********************DETECTING IN: " + project.getName());
+			SampleHandler.printMessage("**********************DETECTING IN: " + project.getName());
 //			findSubTypes(project, "tryCatchPolymorphism.SuperInterface");
 			ExceptionFinder exceptionFinder = new ExceptionFinder();
 			try {
@@ -53,51 +53,6 @@ public class DetectException extends AbstractHandler {
 		}
 	}
 	
-	/**
-	 * @param project
-	 * @param superName
-	 * @return
-	 * 
-	 * There is a serious bug in method: iType.newTypeHierarchy(jProject, new NullProgressMonitor())
-	 * and getAllTypes() on this Hierarchy. It always returns incomplete subTypes.
-	 * So I traverse every Package that is actually in target workspace to get a complete set of subTypes.
-	 */
-	static public HashSet<IType> findSubTypes(IProject project, String superName) {
-		IJavaProject jProject = JavaCore.create(project);
-		HashSet<IType> iTypesSet = new HashSet<IType>();
-//		IType[] iTypes = null;
-		try {
-			IType iType = jProject.findType(superName);
-//			ITypeHierarchy ih = iType.newTypeHierarchy(jProject, new NullProgressMonitor());
-//			if(ih != null) {
-//				iTypes = ih.getAllSubtypes(iType);
-////				IType[] iTypes2 = ih.getAllTypes();
-////				IType[] iTypes3 = ih.getImplementingClasses(iType);
-////				IType[] iTypes4 = ih.getSupertypes(iType);
-//				int a = 1;
-//			}
-			IPackageFragment[] packages = jProject.getPackageFragments();
-			for(IPackageFragment mypackage : packages){
-				if(mypackage.getCompilationUnits().length != 0) {
-					ITypeHierarchy ih = iType.newTypeHierarchy(mypackage.getCompilationUnits(), new NullProgressMonitor());
-					if(ih != null) {
-						IType[] iTypes = ih.getAllSubtypes(iType);
-//						IType[] iTypes2 = ih.getAllTypes();
-//						IType[] iTypes3 = ih.getImplementingClasses(iType);
-//						IType[] iTypes4 = ih.getSupertypes(iType);
-						for(IType t: iTypes) {
-							iTypesSet.add(t);
-						}
-					}
-				}
-			}
-			
-		} catch (JavaModelException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-		return iTypesSet;
-	}
 }
 
 
