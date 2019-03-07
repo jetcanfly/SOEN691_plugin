@@ -25,57 +25,46 @@ public class LogAndThrowVisitor extends ASTVisitor{
 	private boolean isLogAndThrow(CatchClause node) {
 	    
 		String body = node.getBody().toString();		
-		//System.out.println("CATCH CLAUSE BODY: " + body);
-		//System.out.println("CATCH CLAUSE : " + node);
 		
 		boolean throwflag = false;
 		boolean printstacktraceflag = false;
 		boolean logflag = false;
-		boolean sysoutflag = false;
+		boolean printflag = false;
 
-		if(body.contains("throw ")){
-			//System.out.println("****** CONTAINS THROW ******");
+		if(containsIgnoreCase(body, "throw ")){
 			throwflag = true;
 		}
-		if(body.contains("printStackTrace")){
-			//System.out.println("****** CONTAINS PRINT STACK TRACE ******");
+		if(containsIgnoreCase(body, "printStackTrace")) {
 			printstacktraceflag = true;
 		}
-		if(body.contains("System.out.print")){
-			//System.out.println("****** CONTAINS PRINT System.out.print ******");
-			sysoutflag = true;
+		if(containsIgnoreCase(body, "print")){
+			printflag = true;
 		}
-		if(throwflag && printstacktraceflag){
-			System.out.println("****** CONTAINS PRINT STACK TRACE and throw ******");
-		}
-		if( (body.contains("log.error")) ||
-			    (body.contains("log.info")) ||
-			    (body.contains("log.warn")) ||
-			    (body.contains("log.debug")) ||
-			    (body.contains("log.trace")) ||
-			    (body.contains("log.fatal")) ||
-			    (body.contains("logger.trace")) ||
-			    (body.contains("logger.fatal")) ||
-			    (body.contains("logger.error")) ||
-			    (body.contains("logger.info")) ||
-			    (body.contains("logger.warn")) ||
-			    (body.contains("logger.debug")) ) {
-				//System.out.println("****** CONTAINS LOG ******");
+		if( (containsIgnoreCase(body, "log") ||
+				containsIgnoreCase(body, "logger"))) {
 				logflag = true;
 		}
-		if(throwflag && logflag){
-			System.out.println("****** CONTAINS Log and throw ******");
-		}
-		if (throwflag && sysoutflag) {
-			System.out.println("****** CONTAINS System.out.print and throw ******");
-		}
 		
-		if (logflag || printstacktraceflag || sysoutflag) {
+		if (logflag || printstacktraceflag || printflag) {
 			if (throwflag) {
 				return true;
 			}
 		}
 		
 		return false;
+	}
+	
+	private boolean containsIgnoreCase(String str, String searchStr) {
+		 if(str == null || searchStr == null) return false;
+
+		    final int length = searchStr.length();
+		    if (length == 0)
+		        return true;
+
+		    for (int i = str.length() - length; i >= 0; i--) {
+		        if (str.regionMatches(true, i, searchStr, 0, length))
+		            return true;
+		    }
+		    return false;
 	}
 }
