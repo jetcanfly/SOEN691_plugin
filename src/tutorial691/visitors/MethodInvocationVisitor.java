@@ -114,7 +114,7 @@ public class MethodInvocationVisitor extends ASTVisitor {
 
 				// go into the method declaration body to find exception.
 				Block mBody = decl.getBody();
-				if(null != mBody && this.recursionLevel < 1) {
+				if(null != mBody && this.recursionLevel < 3) {
 					MethodInvocationVisitor methodInvocationVisitor = new MethodInvocationVisitor(methodException, this.project);
 					methodInvocationVisitor.recursionLevel = this.recursionLevel + 1;
 					mBody.accept(methodInvocationVisitor);
