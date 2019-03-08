@@ -1,9 +1,12 @@
 package tutorial691.visitors;
 
 import java.util.HashSet;
+import java.util.List;
 
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CatchClause;
+import org.eclipse.jdt.core.dom.Statement;
 
 
 public class LogAndThrowVisitor extends ASTVisitor{
@@ -23,59 +26,50 @@ public class LogAndThrowVisitor extends ASTVisitor{
 	}
 	
 	private boolean isLogAndThrow(CatchClause node) {
-	    
-		String body = node.getBody().toString();		
-		//System.out.println("CATCH CLAUSE BODY: " + body);
-		//System.out.println("CATCH CLAUSE : " + node);
-		
 		boolean throwflag = false;
 		boolean printstacktraceflag = false;
 		boolean logflag = false;
-		boolean sysoutflag = false;
-
-		if(body.contains("throw ")){
-			//System.out.println("****** CONTAINS THROW ******");
-			throwflag = true;
-		}
-		if(body.contains("printStackTrace")){
-			//System.out.println("****** CONTAINS PRINT STACK TRACE ******");
-			printstacktraceflag = true;
-		}
-		if(body.contains("System.out.print")){
-			//System.out.println("****** CONTAINS PRINT System.out.print ******");
-			sysoutflag = true;
-		}
-		if(throwflag && printstacktraceflag){
-			System.out.println("****** CONTAINS PRINT STACK TRACE and throw ******");
-		}
-		if( (body.contains("log.error")) ||
-			    (body.contains("log.info")) ||
-			    (body.contains("log.warn")) ||
-			    (body.contains("log.debug")) ||
-			    (body.contains("log.trace")) ||
-			    (body.contains("log.fatal")) ||
-			    (body.contains("logger.trace")) ||
-			    (body.contains("logger.fatal")) ||
-			    (body.contains("logger.error")) ||
-			    (body.contains("logger.info")) ||
-			    (body.contains("logger.warn")) ||
-			    (body.contains("logger.debug")) ) {
-				//System.out.println("****** CONTAINS LOG ******");
-				logflag = true;
-		}
-		if(throwflag && logflag){
-			System.out.println("****** CONTAINS Log and throw ******");
-		}
-		if (throwflag && sysoutflag) {
-			System.out.println("****** CONTAINS System.out.print and throw ******");
+		boolean printflag = false;
+		
+		List<Statement> statements = node.getBody().statements();		
+		for (Statement statement : statements) {
+			System.out.println(statement.getClass());
+			if (statement.getNodeType() == ASTNode.THROW_STATEMENT) {
+				throwflag = true;
+			} else {
+				if(containsIgnoreCase(statement.toString(), "printStackTrace")) {
+					printstacktraceflag = true;
+				}
+				if(containsIgnoreCase(statement.toString(), "print")){
+					printflag = true;
+				}
+				if( (containsIgnoreCase(statement.toString(), "log") ||
+						containsIgnoreCase(statement.toString(), "logger"))) {
+						logflag = true;
+				}
+			}
 		}
 		
-		if (logflag || printstacktraceflag || sysoutflag) {
+		if (logflag || printstacktraceflag || printflag) {
 			if (throwflag) {
 				return true;
 			}
 		}
 		
 		return false;
+	}
+	
+	private boolean containsIgnoreCase(String str, String searchStr) {
+		 if(str == null || searchStr == null) return false;
+
+		    final int length = searchStr.length();
+		    if (length == 0)
+		        return true;
+
+		    for (int i = str.length() - length; i >= 0; i--) {
+		        if (str.regionMatches(true, i, searchStr, 0, length))
+		            return true;
+		    }
+		    return false;
 	}
 }
