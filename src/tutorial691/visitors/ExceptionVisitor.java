@@ -52,8 +52,10 @@ public class ExceptionVisitor extends ASTVisitor{
 		exceptionTryHashSet.addAll(methodInvocationVisitor.exceptionTryHashSet);
 		if(isOverCatch()) {
 			overCatchTryStatement.put(node, exceptionTryHashSet.toString());
-			this.countOverCatchExitPerFile += catchVisitor.countOverCatchExit;
-			this.countOverCatchPerFile += 1;
+			// anti-pattern: overcatch and abort
+			// actually there is a little noise. So the data will be manually correct.
+			this.countOverCatchExitPerFile += catchVisitor.countOverCatchExit;  
+			this.countOverCatchPerFile += 1;  
 		}
 		clear();
 		return super.visit(node);
