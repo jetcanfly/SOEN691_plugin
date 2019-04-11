@@ -33,6 +33,7 @@ import tutorial691.handlers.SampleHandler;
 import tutorial691.visitors.ExceptionVisitor;
 import tutorial691.visitors.LogAndThrowVisitor;
 import tutorial691.visitors.MultipleThrowsVisitor;
+import tutorial691.visitors.TrySizeVisitor;
 
 public class ExceptionFinder {
 
@@ -113,9 +114,20 @@ public class ExceptionFinder {
 			//			MultipleThrowsVisitor multipleException  = new MultipleThrowsVisitor();
 			//			parsedCompilationUnit.accept(multipleException);
 			//			printMultipleExceptions(multipleException,parsedCompilationUnit);
+			TrySizeVisitor trySizeVisitor = new TrySizeVisitor();
+			parsedCompilationUnit.accept(trySizeVisitor);
+			printSizeQuantityExceptions(trySizeVisitor);
 		} 
 	}
+	private void printSizeQuantityExceptions(TrySizeVisitor visitor) {
+		
+		SampleHandler.printMessage("find Try Quantity: \n" + visitor.getTryQuantity());
 
+		System.out.println("find Try Quantity: \n" + visitor.getTryQuantity());
+
+
+	
+}
 	private void printMultipleExceptions(MultipleThrowsVisitor visitor, CompilationUnit compilationunit) {
 
 		if(visitor.getMethodName().size() != 0) {
