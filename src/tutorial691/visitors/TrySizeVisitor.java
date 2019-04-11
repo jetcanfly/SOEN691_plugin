@@ -17,16 +17,28 @@ import java.io.LineNumberReader;
 
 public class TrySizeVisitor extends ASTVisitor{
 	int tryQuantity = 0;
-
+	int tryLOC =0;	
 
 
 	
 	public boolean visit(TryStatement node) {
 		this.tryQuantity++;
+		this.getLOC(node);
 		return super.visit(node);
 	}
+	public  void getLOC(TryStatement node) {
+		String a = node.getBody().toString();
+		for(int i=0; i<a.length();i++) {
+			if(a.charAt(i)==('\n')) {
+				tryLOC++;
+			}	
+		}
+	}
 
-
+	public int getTrySize() {
+		return tryLOC;
+	}
+	
 	public int getTryQuantity() {
 		return tryQuantity;
 	}
