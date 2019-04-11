@@ -1,5 +1,6 @@
 package tutorial691.visitors;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -14,13 +15,19 @@ public class LogAndThrowVisitor extends ASTVisitor{
 	static public HashMap<String, HashMap<String, Integer>> metricMap = new HashMap<String, HashMap<String,Integer>>();
 	public int numberOfLogAndThrow = 0;
 	public int numberOfCatch = 0;
+	public int numberOfCatchAndDoNothing = 0;
+	
+	
+	
+	
+	
+	
+	
+	
+	
 
 	public HashSet<CatchClause> logAndThrowCathesCatchClauses = new HashSet<>();
-	
-	public HashSet<CatchClause> getLogAndThrowCathesCatchClauses() {
-		return this.logAndThrowCathesCatchClauses;
-	}
-	
+		
 	@Override
 	public boolean visit(CatchClause node) {
 		// *** Catch Quantity ***
@@ -28,10 +35,10 @@ public class LogAndThrowVisitor extends ASTVisitor{
 		
 		
 		// *** Catch and Do Nothing ***
-//		List<Statement> statements = node.getBody().statements();		
-//		if (statements.size() == 0) {
-//			catchAndDoNothing.add(node);
-//		}
+		List<Statement> statements = node.getBody().statements();		
+		if (statements.size() == 0) {
+			this.numberOfCatchAndDoNothing++;
+		}
 		
 		// *** Catch and Return Null ***
 //		if (isReturnNull(node)) {
@@ -57,9 +64,9 @@ public class LogAndThrowVisitor extends ASTVisitor{
 		// *** Log and Return Null ***
 		
 //		try {
-//			
+//				
 //		} catch (SQLClientInfoException | IOException e2) {
-//			return null;
+//			
 //		}
 		
 		
