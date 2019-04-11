@@ -19,13 +19,14 @@ public class TrySizeVisitor extends ASTVisitor{
 	int tryQuantity = 0;
 	int tryLOC =0;
 	int tryCondition =0;
-
+	int tryLoop =0;
 
 	
 	public boolean visit(TryStatement node) {
 		this.tryQuantity++;
 		this.getLOC(node);
 		this.getConditionInTry(node);
+		this.getLoopInTry(node);
 		return super.visit(node);
 	}
 
@@ -35,6 +36,31 @@ public class TrySizeVisitor extends ASTVisitor{
 		getSwitchInTry(node);
 	}
 
+	public  void getLoopInTry(TryStatement node) {
+		getWhileInTry(node);
+		getForInTry(node);
+	}
+	
+	public void getWhileInTry(TryStatement node) {
+		String a = node.getBody().toString();
+		for(int i=0; i<a.length()-5;i++) {
+			String tempWhile = a.substring(0+i,6+i);
+			if(tempWhile.equals("while ")) {
+				tryLoop++;
+			}
+		}
+	}
+	
+	public void getForInTry(TryStatement node) {
+		String a = node.getBody().toString();
+		for(int i=0; i<a.length()-3;i++) {
+			String tempFor = a.substring(0+i,4+i);
+			if(tempFor.equals("for ")) {
+				tryLoop++;
+			}
+		}
+	}
+	
 	public void getIfInTry(TryStatement node) {
 		String a = node.getBody().toString();
 		for(int i=0; i<a.length()-2;i++) {
@@ -75,4 +101,7 @@ public class TrySizeVisitor extends ASTVisitor{
 		return tryQuantity;
 	}
 
+	public int getTryLoop() {
+		return tryLoop;
+	}
 }

@@ -124,9 +124,11 @@ public class ExceptionFinder {
 		SampleHandler.printMessage("find Try Quantity: \n" + visitor.getTryQuantity());
 		SampleHandler.printMessage("find Try LOC: \n" + visitor.getTrySize());
 		SampleHandler.printMessage("find Try Condition Scope: \n" +visitor.getTryCondition());
+		SampleHandler.printMessage("find Try Loop Scope: \n" + visitor.getTryLoop());
 		System.out.println("find Try Quantity: \n" + visitor.getTryQuantity());
 		System.out.println("find Try LOC: \n" + visitor.getTrySize());
 		System.out.println("find Try Condition Scope: \n" +visitor.getTryCondition());
+		System.out.println("find Try Loop Scope: \n" + visitor.getTryLoop());
 
 
 	
