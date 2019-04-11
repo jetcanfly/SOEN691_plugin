@@ -38,9 +38,11 @@ public class DetectException extends AbstractHandler {
 
 		return null;
 	}
-
+		
 	private void detectInProjects(IProject[] projects) {
+//		int i = 0;
 		for(IProject project : projects) {
+//			if(i==4) return;
 			System.out.println("**********************DETECTING IN: " + project.getName());
 			SampleHandler.printMessage("**********************DETECTING IN: " + project.getName());
 //			findSubTypes(project, "tryCatchPolymorphism.SuperInterface");
@@ -49,7 +51,8 @@ public class DetectException extends AbstractHandler {
 				exceptionFinder.findExceptions(project);
 			} catch (JavaModelException e) {
 				e.printStackTrace();
-			}	
+			}
+//			i++;
 		}
 	}
 	

@@ -47,13 +47,14 @@ public class ExceptionFinder {
 		
 		for(IPackageFragment mypackage : packages){
 			this.packageFragment = mypackage;
-			SampleHandler.printMessage("**********checking package: " + mypackage.getElementName());
-			System.out.println("**********checking package: " + mypackage.getElementName());
+//			SampleHandler.printMessage("**********checking package: " + mypackage.getElementName());
+//			System.out.println("**********checking package: " + mypackage.getElementName());
 			checkExceptions(mypackage);
 		}
 }
 	
 	private void checkExceptions(IPackageFragment packageFragment) throws JavaModelException {
+//		if(packageFragment.getCompilationUnits().length==0) return;
 		for (ICompilationUnit unit : packageFragment.getCompilationUnits()) {
 			this.iCompilationUnit = unit;
 			// get source path
@@ -90,34 +91,45 @@ public class ExceptionFinder {
 //			parsedCompilationUnit.accept(logAndThrowVistor);
 //			printLogAndThrowExceptions(logAndThrowVistor);
 //			
-//			MultipleThrowsVisitor multipleException  = new MultipleThrowsVisitor();
-//			parsedCompilationUnit.accept(multipleException);
-//			printMultipleExceptions(multipleException,parsedCompilationUnit);
+			MultipleThrowsVisitor multipleException  = new MultipleThrowsVisitor();
+			parsedCompilationUnit.accept(multipleException);
+			printMultipleExceptions(multipleException,parsedCompilationUnit);
 		} 
 	}
 	
 	private void printMultipleExceptions(MultipleThrowsVisitor visitor, CompilationUnit compilationunit) {
-
-		if(visitor.getMethodName().size() != 0) {
-			SampleHandler.printMessage("+++++++++Find multiple exception throw+++++++++");
-			System.out.println("+++++++++Find multiple exception throw+++++++++");
-			SampleHandler.printMessage("find multiple exception throw in project: \n" + this.project.getName());
-			System.out.println("find multiple exception throw in project: \n" + this.project.getName());
-			SampleHandler.printMessage("find multiple exception throw in package: \n" + this.packageFragment.getElementName());
-			System.out.println("find multiple exception throw in package: \n" + this.packageFragment.getElementName());
+		Map<String,Integer> metricAndValue = visitor.getOuput2();
+		String path = compilationunit.getJavaElement().getPath().toString().substring(1);
+		if(path.substring(0, 6).equals("kylin-")) {
+			path = path.substring(6);
 		}
-		for(MethodDeclaration method:visitor.getMethodName()) {
-			SampleHandler.printMessage("find in class: \n" + ((TypeDeclaration)(method.getParent())).getName());
-			System.out.println("find in class: \n" + ((TypeDeclaration)(method.getParent())).getName());
-			SampleHandler.printMessage("Method: "+method.getName());
-			System.out.println("Method: "+method.getName());
-			SampleHandler.printMessage("Exception Names: ");
-			System.out.println("Exception Names: ");
-			for(Object type:method.thrownExceptionTypes()) {
-				SampleHandler.printMessage(type.toString());
-				System.out.println(type.toString());
-			}
+		if(path.contains("src\test") || path.contains("src/test") || metricAndValue.get("ThrowKitchenAndSink")==0 ) {
+			
+		}else {
+			visitor.getOutput().put(path, metricAndValue);
 		}
+		SampleHandler.printMessage("ThrowKitchenAndSink Number: " + visitor.getOutput().size());
+		System.out.println("ThrowKitchenAndSink Number: " + visitor.getOutput().size());
+//		if(visitor.getMethodName().size() != 0) {
+//			SampleHandler.printMessage("+++++++++Find multiple exception throw+++++++++");
+//			System.out.println("+++++++++Find multiple exception throw+++++++++");
+//			SampleHandler.printMessage("find multiple exception throw in project: \n" + this.project.getName());
+//			System.out.println("find multiple exception throw in project: \n" + this.project.getName());
+//			SampleHandler.printMessage("find multiple exception throw in package: \n" + this.packageFragment.getElementName());
+//			System.out.println("find multiple exception throw in package: \n" + this.packageFragment.getElementName());
+//		}
+//		for(MethodDeclaration method:visitor.getMethodName()) {
+//			SampleHandler.printMessage("find in class: \n" + ((TypeDeclaration)(method.getParent())).getName());
+//			System.out.println("find in class: \n" + ((TypeDeclaration)(method.getParent())).getName());
+//			SampleHandler.printMessage("Method: "+method.getName());
+//			System.out.println("Method: "+method.getName());
+//			SampleHandler.printMessage("Exception Names: ");
+//			System.out.println("Exception Names: ");
+//			for(Object type:method.thrownExceptionTypes()) {
+//				SampleHandler.printMessage(type.toString());
+//				System.out.println(type.toString());
+//			}
+//		}
 		if(visitor.getMethodName().size() != 0) {
 			System.out.print("+++++++++++++++++++++++++\n\n");
 			SampleHandler.printMessage("+++++++++++++++++++++++++\n\n");
