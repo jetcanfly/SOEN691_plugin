@@ -17,7 +17,7 @@ public class App
     	FileInputStream freader;
     	HashMap<String, HashMap<String, Integer>> map = new HashMap<String, HashMap<String, Integer>>();
 		try {
-			freader = new FileInputStream("E:/OverCatch.txt");  // set to your map file path.
+			freader = new FileInputStream("D:\\Study\\Concordia\\SOEN691\\Project\\throwAndKitchenSinkMetric.txt");  // set to your map file path.
 			ObjectInputStream objectInputStream = new ObjectInputStream(freader);
 			map = (HashMap<String, HashMap<String, Integer>>) objectInputStream.readObject();
 //			System.out.println("The name is " + map3.get("test2"));
@@ -31,7 +31,7 @@ public class App
 		ObjectMapper mapper = new ObjectMapper();
 		try {
 			mapper.enable(SerializationFeature.INDENT_OUTPUT);
-			mapper.writeValue(new File("E:/metric.json"), map);
+			mapper.writeValue(new File("D:\\Study\\Concordia\\SOEN691\\Project\\throwAndKitchenSinkMetric.json"), map);
 			System.out.println("json output finished.");
 		} catch (Exception e) {
 			e.printStackTrace();

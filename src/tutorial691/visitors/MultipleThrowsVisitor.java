@@ -11,7 +11,7 @@ import org.eclipse.jdt.core.dom.Type;
 
 public class MultipleThrowsVisitor extends ASTVisitor {
 	List<MethodDeclaration> methodName = new ArrayList<>();
-	static Map<String,Map<String,Integer>> output = new HashMap<>();
+	public static Map<String,Map<String,Integer>> output = new HashMap<>();
 	Map<String,Integer> output2 = new HashMap<>();
 	int methodsNumber;
 	@Override

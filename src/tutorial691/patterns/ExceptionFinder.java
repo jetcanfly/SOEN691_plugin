@@ -60,9 +60,9 @@ public class ExceptionFinder {
 	static public void serializeMap() {
 		// Use your map and whatever file path you want.
 		try {
-			FileOutputStream outStream = new FileOutputStream("E:/OverCatch.txt");
+			FileOutputStream outStream = new FileOutputStream("D:\\Study\\Concordia\\SOEN691\\Project\\throwAndKitchenSinkMetric.txt");
 			ObjectOutputStream objectOutputStream = new ObjectOutputStream(outStream);
-			objectOutputStream.writeObject(ExceptionVisitor.metricMap);  // Hard-code, change to your metrics.
+			objectOutputStream.writeObject(MultipleThrowsVisitor.output);  // Hard-code, change to your metrics.
 			outStream.close();
 			System.out.println("successful");
 
@@ -102,7 +102,7 @@ public class ExceptionFinder {
 			}
 			CompilationUnit parsedCompilationUnit = parse(unit);
 
-			// We should build 3 Visitors here and use them one by one.
+//			 We should build 3 Visitors here and use them one by one.
 //			ExceptionVisitor exceptionVisitor = new ExceptionVisitor(this.methodException, project);
 //			parsedCompilationUnit.accept(exceptionVisitor);
 //			printOverCatchExceptions(exceptionVisitor, parsedCompilationUnit);
