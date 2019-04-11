@@ -148,7 +148,7 @@ public class ExceptionFinder {
 	private void printLogAndThrowExceptions(LogAndThrowVisitor visitor) {
 		HashMap<String, Integer> fileMap = new HashMap<String, Integer>();
 		fileMap.put("logAndThrow", visitor.numberOfLogAndThrow);
-		
+		fileMap.put("catchQuantity", visitor.numberOfCatch);
 		
 		LogAndThrowVisitor.metricMap.put(this.filePath, fileMap);
 

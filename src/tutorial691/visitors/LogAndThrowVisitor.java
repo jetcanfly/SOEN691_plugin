@@ -13,6 +13,7 @@ import org.eclipse.jdt.core.dom.Statement;
 public class LogAndThrowVisitor extends ASTVisitor{
 	static public HashMap<String, HashMap<String, Integer>> metricMap = new HashMap<String, HashMap<String,Integer>>();
 	public int numberOfLogAndThrow = 0;
+	public int numberOfCatch = 0;
 
 	public HashSet<CatchClause> logAndThrowCathesCatchClauses = new HashSet<>();
 	
@@ -22,10 +23,63 @@ public class LogAndThrowVisitor extends ASTVisitor{
 	
 	@Override
 	public boolean visit(CatchClause node) {
+		// *** Catch Quantity ***
+		this.numberOfCatch++;
+		
+		
+		// *** Catch and Do Nothing ***
+//		List<Statement> statements = node.getBody().statements();		
+//		if (statements.size() == 0) {
+//			catchAndDoNothing.add(node);
+//		}
+		
+		// *** Catch and Return Null ***
+//		if (isReturnNull(node)) {
+//			catchAndReturnNull.add(node);
+//		}
+		
+		// *** Catch generic ***
+//		if (isCatchGeneric(node)) {
+//			catchGeneric.add(node);
+//		}
+		
+		// *** Destructive Wrapping ***
+		
+		
+		// *** Dummy Handle ***
+		
+		
+		// *** Ignoring InterruptedException ***
+		
+		
+		//  *** Incomplete Implementation ***
+		
+		// *** Log and Return Null ***
+		
+//		try {
+//			
+//		} catch (SQLClientInfoException | IOException e2) {
+//			return null;
+//		}
+		
+		
+		// *** log and throw ***
 		if (isLogAndThrow(node)) {
 			logAndThrowCathesCatchClauses.add(node);
 			this.numberOfLogAndThrow++;
 		}
+		
+		// *** Multi-Line Log ***
+		
+		// *** Nested Try ***
+		
+		// *** Relying on getCause() ***
+		
+		// *** Throw within Finally ***
+		
+		// *** Throws Generic ***
+		
+		// *** Throws Kitchen Sink ***
 		
 		return super.visit(node);
 	}
