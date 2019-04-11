@@ -62,7 +62,7 @@ public class ExceptionFinder {
 		try {
 			FileOutputStream outStream = new FileOutputStream("G:/OverCatch.txt");
 			ObjectOutputStream objectOutputStream = new ObjectOutputStream(outStream);
-			objectOutputStream.writeObject(ExceptionVisitor.metricMap);  // Hard-code, change to your metrics.
+			objectOutputStream.writeObject(LogAndThrowVisitor.metricMap);  // Hard-code, change to your metrics.
 			outStream.close();
 			System.out.println("successful");
 
@@ -102,13 +102,14 @@ public class ExceptionFinder {
 			CompilationUnit parsedCompilationUnit = parse(unit);
 
 			// We should build 3 Visitors here and use them one by one.
-			ExceptionVisitor exceptionVisitor = new ExceptionVisitor(this.methodException, project);
-			parsedCompilationUnit.accept(exceptionVisitor);
-			printOverCatchExceptions(exceptionVisitor, parsedCompilationUnit);
+			
+//			ExceptionVisitor exceptionVisitor = new ExceptionVisitor(this.methodException, project);
+//			parsedCompilationUnit.accept(exceptionVisitor);
+//			printOverCatchExceptions(exceptionVisitor, parsedCompilationUnit);
 
-			//			LogAndThrowVisitor logAndThrowVistor = new LogAndThrowVisitor();
-			//			parsedCompilationUnit.accept(logAndThrowVistor);
-			//			printLogAndThrowExceptions(logAndThrowVistor);
+						LogAndThrowVisitor logAndThrowVistor = new LogAndThrowVisitor();
+						parsedCompilationUnit.accept(logAndThrowVistor);
+						printLogAndThrowExceptions(logAndThrowVistor);
 			//			
 			//			MultipleThrowsVisitor multipleException  = new MultipleThrowsVisitor();
 			//			parsedCompilationUnit.accept(multipleException);
@@ -145,15 +146,13 @@ public class ExceptionFinder {
 	}
 
 	private void printLogAndThrowExceptions(LogAndThrowVisitor visitor) {
-		for (CatchClause catchClause : visitor.getLogAndThrowCathesCatchClauses()) {
-			MethodDeclaration methodDeclaration = findMethodForCatch(catchClause);
+		HashMap<String, Integer> fileMap = new HashMap<String, Integer>();
+		fileMap.put("logAndThrow", visitor.numberOfLogAndThrow);
+		
+		
+		LogAndThrowVisitor.metricMap.put(this.filePath, fileMap);
 
-			SampleHandler.printMessage("find method suffers from Log and Throw: \n" + methodDeclaration.toString());
-			System.out.println("find method suffers from Log and Throw: \n" + methodDeclaration.toString());
-			SampleHandler.printMessage(catchClause.toString());
-			System.out.println(catchClause.toString());
-
-		}
+		
 	}
 
 	private void printOverCatchExceptions(ExceptionVisitor visitor, CompilationUnit parsedCompilationUnit) {

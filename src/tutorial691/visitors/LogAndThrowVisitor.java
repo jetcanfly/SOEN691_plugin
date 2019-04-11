@@ -1,5 +1,6 @@
 package tutorial691.visitors;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
@@ -10,16 +11,20 @@ import org.eclipse.jdt.core.dom.Statement;
 
 
 public class LogAndThrowVisitor extends ASTVisitor{
-	HashSet<CatchClause> logAndThrowCathesCatchClauses = new HashSet<>();
+	static public HashMap<String, HashMap<String, Integer>> metricMap = new HashMap<String, HashMap<String,Integer>>();
+	public int numberOfLogAndThrow = 0;
+
+	public HashSet<CatchClause> logAndThrowCathesCatchClauses = new HashSet<>();
 	
 	public HashSet<CatchClause> getLogAndThrowCathesCatchClauses() {
-		return logAndThrowCathesCatchClauses;
+		return this.logAndThrowCathesCatchClauses;
 	}
 	
 	@Override
 	public boolean visit(CatchClause node) {
 		if (isLogAndThrow(node)) {
 			logAndThrowCathesCatchClauses.add(node);
+			this.numberOfLogAndThrow++;
 		}
 		
 		return super.visit(node);
@@ -31,23 +36,19 @@ public class LogAndThrowVisitor extends ASTVisitor{
 		boolean logflag = false;
 		boolean printflag = false;
 		
-		List<Statement> statements = node.getBody().statements();		
-		for (Statement statement : statements) {
-			System.out.println(statement.getClass());
-			if (statement.getNodeType() == ASTNode.THROW_STATEMENT) {
-				throwflag = true;
-			} else {
-				if(containsIgnoreCase(statement.toString(), "printStackTrace")) {
-					printstacktraceflag = true;
-				}
-				if(containsIgnoreCase(statement.toString(), "print")){
-					printflag = true;
-				}
-				if( (containsIgnoreCase(statement.toString(), "log") ||
-						containsIgnoreCase(statement.toString(), "logger"))) {
-						logflag = true;
-				}
-			}
+		String body = node.getBody().toString();
+		if (this.containsIgnoreCase(body, "throw")) {
+			throwflag = true;
+		}
+		if(containsIgnoreCase(body, "printStackTrace")) {
+			printstacktraceflag = true;
+		}
+		if(containsIgnoreCase(body, "print")){
+			printflag = true;
+		}
+		if( (containsIgnoreCase(body, "log") ||
+				containsIgnoreCase(body, "logger"))) {
+				logflag = true;
 		}
 		
 		if (logflag || printstacktraceflag || printflag) {
