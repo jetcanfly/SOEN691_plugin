@@ -1,7 +1,5 @@
 package tutorial691.handlers;
 
-import java.util.HashSet;
-
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
@@ -10,20 +8,15 @@ import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.ITypeHierarchy;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import tutorial691.patterns.ExceptionFinder;
 
 
 public class DetectException extends AbstractHandler {
-	
+
 	static public NullProgressMonitor nullProgressMonitor = new NullProgressMonitor();
-	
+
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
@@ -32,7 +25,8 @@ public class DetectException extends AbstractHandler {
 		IProject[] projects = root.getProjects();
 
 		detectInProjects(projects);
-
+		ExceptionFinder.serializeMap();
+		
 		SampleHandler.printMessage("DONE DETECTING");
 		System.out.println("DONE DETECTING");
 
@@ -43,7 +37,7 @@ public class DetectException extends AbstractHandler {
 		for(IProject project : projects) {
 			System.out.println("**********************DETECTING IN: " + project.getName());
 			SampleHandler.printMessage("**********************DETECTING IN: " + project.getName());
-//			findSubTypes(project, "tryCatchPolymorphism.SuperInterface");
+			//			findSubTypes(project, "tryCatchPolymorphism.SuperInterface");
 			ExceptionFinder exceptionFinder = new ExceptionFinder();
 			try {
 				exceptionFinder.findExceptions(project);
@@ -52,7 +46,7 @@ public class DetectException extends AbstractHandler {
 			}	
 		}
 	}
-	
+
 }
 
 

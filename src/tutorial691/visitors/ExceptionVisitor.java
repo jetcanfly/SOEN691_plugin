@@ -14,11 +14,16 @@ import org.eclipse.ui.activities.IActivityListener;
 
 
 public class ExceptionVisitor extends ASTVisitor{
+	static public HashMap<String, HashMap<String, Integer>> metricMap = new HashMap<String, HashMap<String,Integer>>();
+	public int countOverCatchPerFile = 0;  // count how many Overcatch for each file
+	public int countOverCatchExitPerFile = 0;  // count how many Overcatch and exit for each file
+	
 	HashMap<TryStatement, String> overCatchTryStatement = new HashMap<>();
 	HashSet<String> exceptionCatchHashSet = new HashSet<>();
 	public HashSet<String> exceptionTryHashSet = new HashSet<>();
 	HashMap<String, HashSet<String>> methodException;  // Given
 	public IProject project;
+	
 	
 	public ExceptionVisitor(HashMap<String, HashSet<String>> fileException) {
 		this.methodException = fileException;
@@ -47,6 +52,8 @@ public class ExceptionVisitor extends ASTVisitor{
 		exceptionTryHashSet.addAll(methodInvocationVisitor.exceptionTryHashSet);
 		if(isOverCatch()) {
 			overCatchTryStatement.put(node, exceptionTryHashSet.toString());
+			this.countOverCatchExitPerFile += catchVisitor.countOverCatchExit;
+			this.countOverCatchPerFile += 1;
 		}
 		clear();
 		return super.visit(node);

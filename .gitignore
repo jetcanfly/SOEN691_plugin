@@ -1,2 +1,7 @@
 .settings/
 bin/
+
+test-resource/jsonConvert/.classpath
+test-resource/jsonConvert/.gitignore
+test-resource/jsonConvert/.project
+
