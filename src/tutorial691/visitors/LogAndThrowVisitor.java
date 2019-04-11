@@ -23,15 +23,15 @@ public class LogAndThrowVisitor extends ASTVisitor{
 	public int numberOfCatchAndDoNothing = 0;
 	public int numberOfCatchAndReturnNull = 0;
 	public int numberOfCatchGeneric = 0;
+	public int numberOfDummyHandle = 0;
+			
 	
 	
 	
 	
 	
 	
-	
-	
-	
+
 
 	public HashSet<CatchClause> logAndThrowCathesCatchClauses = new HashSet<>();
 		
@@ -41,7 +41,8 @@ public class LogAndThrowVisitor extends ASTVisitor{
 		this.numberOfCatch++;
 		
 		
-		List<Statement> statements = node.getBody().statements();		
+		List<Statement> statements = node.getBody().statements();
+		
 		// *** Catch and Do Nothing ***
 		if (statements.size() == 0) {
 			this.numberOfCatchAndDoNothing++;
@@ -51,7 +52,7 @@ public class LogAndThrowVisitor extends ASTVisitor{
 		for (Statement statement : statements) {
 			if (statement.getNodeType() == ASTNode.RETURN_STATEMENT) {
 				if (containsIgnoreCase(statement.toString(), "null")) {
-					numberOfCatchAndReturnNull++;
+					this.numberOfCatchAndReturnNull++;
 				}
 			}
 		}
@@ -62,14 +63,14 @@ public class LogAndThrowVisitor extends ASTVisitor{
 			for(Object eachType: ((UnionType)exceptionType).types()) {
 				String exceptionName = eachType.toString();
 				if (exceptionName.equals("Exception")) {
-					numberOfCatchGeneric++;
+					this.numberOfCatchGeneric++;
 				}
 			}
 			
 		} else {
 			String exceptionName = exceptionType.toString();
 			if (exceptionName.equals("Exception")) {
-				numberOfCatchGeneric++;
+				this.numberOfCatchGeneric++;
 			}
 		}
 		
@@ -78,14 +79,26 @@ public class LogAndThrowVisitor extends ASTVisitor{
 		
 		
 		// *** Dummy Handle ***
-		
+		for (Statement statement : statements) {
+			if (this.containsIgnoreCase(statement.toString(), "log") || containsIgnoreCase(statement.toString(), "logger")
+					|| containsIgnoreCase(statement.toString(), "print") || containsIgnoreCase(statement.toString(), "printStackTrace")) {
+				continue;
+			} else {
+				this.numberOfDummyHandle++;
+				break;
+			}
+		}
+
 		
 		// *** Ignoring InterruptedException ***
 		
 		
 		//  *** Incomplete Implementation ***
 		
+		
 		// *** Log and Return Null ***
+		
+		
 		
 //		try {
 //				
@@ -102,9 +115,12 @@ public class LogAndThrowVisitor extends ASTVisitor{
 		
 		// *** Multi-Line Log ***
 		
+		
 		// *** Nested Try ***
 		
+		
 		// *** Relying on getCause() ***
+		
 		
 		// *** Throw within Finally ***
 		
