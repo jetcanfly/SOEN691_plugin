@@ -11,6 +11,7 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.UnionType;
 
 public class CatchClauseVisitor extends ASTVisitor {
+	public int countOverCatchExit = 0;
 	HashSet<String> exceptionType;
 	
 	public CatchClauseVisitor(HashSet<String> exceptionType) {
@@ -32,6 +33,12 @@ public class CatchClauseVisitor extends ASTVisitor {
 			String exceptionName = VB.getName();
 			this.exceptionType.add(exceptionName);
 		}
+		
+		String content = node.getBody().toString();  // anti-pattern: Over-catch and abort.
+		if(content.contains("exit") || content.contains("abort")) {	
+			this.countOverCatchExit ++;
+		}
+		
 		return super.visit(node);
 	}
 
