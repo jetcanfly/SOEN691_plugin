@@ -18,12 +18,13 @@ import java.io.LineNumberReader;
 public class TrySizeVisitor extends ASTVisitor{
 	int tryQuantity = 0;
 	int tryLOC =0;	
-
+	int tryCondition =0;
 
 	
 	public boolean visit(TryStatement node) {
 		this.tryQuantity++;
 		this.getLOC(node);
+		this.getConditionInTry(node);
 		return super.visit(node);
 	}
 	public  void getLOC(TryStatement node) {
@@ -34,7 +35,37 @@ public class TrySizeVisitor extends ASTVisitor{
 			}	
 		}
 	}
-
+	
+	public  void getConditionInTry(TryStatement node) {
+		
+		getIfInTry(node);
+		getSwitchInTry(node);
+	}
+	
+	public void getIfInTry(TryStatement node) {
+		String a = node.getBody().toString();
+		for(int i=0; i<a.length()-2;i++) {
+			String tempif = a.substring(0+i,3+i);
+			if(tempif.equals("if ")) {
+				tryCondition++;
+			}
+		}
+	}
+	
+	public void getSwitchInTry(TryStatement node) {
+		String a = node.getBody().toString();
+		for(int i=0; i<a.length()-6;i++) {
+			String tempSwitch = a.substring(0+i,7+i);
+			if(tempSwitch.equals("switch ")) {
+				tryCondition++;
+			}
+		}
+	}
+	
+	public int getTryCondition() {
+		return tryCondition;
+	}
+	
 	public int getTrySize() {
 		return tryLOC;
 	}
