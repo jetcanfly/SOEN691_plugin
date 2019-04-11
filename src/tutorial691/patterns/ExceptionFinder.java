@@ -122,8 +122,9 @@ public class ExceptionFinder {
 	private void printSizeQuantityExceptions(TrySizeVisitor visitor) {
 		
 		SampleHandler.printMessage("find Try Quantity: \n" + visitor.getTryQuantity());
-
+		SampleHandler.printMessage("find Try LOC: \n" + visitor.getTrySize());
 		System.out.println("find Try Quantity: \n" + visitor.getTryQuantity());
+		System.out.println("find Try LOC: \n" + visitor.getTrySize());
 
 
 	
