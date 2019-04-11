@@ -39,6 +39,7 @@ public class MethodInvocationVisitor extends ASTVisitor {
 	private IProject project;
 	public int recursionLevel = 0;  // set a recursion threshold in case too much recursion leads to memory running-out
 	public TryStatement tryStatement = null;
+	public HashSet<String> exceptionCatchHashSet = null;
 	
 	public IProject getProject() {
 		return project;
@@ -91,6 +92,12 @@ public class MethodInvocationVisitor extends ASTVisitor {
 		for(ITypeBinding type: iMethodBinding.getExceptionTypes()) {  // If method throws exception
 			String exception = type.getName();
 			exceptionSet.add(exception);
+			if(this.exceptionCatchHashSet.contains(exception) && !ExceptionVisitor.call_depth.containsKey(exception)) {
+				ExceptionVisitor.call_depth.put(exception, this.recursionLevel);
+				if(this.recursionLevel != 0) {
+					ExceptionVisitor.isFound = true;
+				}
+			}
 		}
 		
 		ICompilationUnit unit = null;
@@ -113,7 +120,14 @@ public class MethodInvocationVisitor extends ASTVisitor {
 						if(tag.getTagName() == TagElement.TAG_THROWS || 
 								tag.getTagName() == TagElement.TAG_EXCEPTION) {
 							Object docName = tag.fragments().get(0);
+							String exception = ((SimpleName)docName).getFullyQualifiedName();
 							exceptionSet.add(((SimpleName)docName).getFullyQualifiedName());
+							if(this.exceptionCatchHashSet.contains(exception) && !ExceptionVisitor.call_depth.containsKey(exception)) {
+								ExceptionVisitor.call_depth.put(exception, this.recursionLevel);
+								if(this.recursionLevel != 0) {
+									ExceptionVisitor.isFound = true;
+								}
+							}
 						}
 					}
 				}
@@ -122,6 +136,7 @@ public class MethodInvocationVisitor extends ASTVisitor {
 				Block mBody = decl.getBody();
 				if(null != mBody && this.recursionLevel < 3) {
 					MethodInvocationVisitor methodInvocationVisitor = new MethodInvocationVisitor(methodException, this.project);
+					methodInvocationVisitor.exceptionCatchHashSet = this.exceptionCatchHashSet;
 					methodInvocationVisitor.recursionLevel = this.recursionLevel + 1;
 					mBody.accept(methodInvocationVisitor);
 					exceptionSet.addAll(methodInvocationVisitor.exceptionTryHashSet);
@@ -142,11 +157,20 @@ public class MethodInvocationVisitor extends ASTVisitor {
 			try {
 				unit2 = ExceptionFinder.parse(classFile.getSource());
 				MethodDeclarationVisitor visitor = new MethodDeclarationVisitor();
+				visitor.exceptionCatchHashSet = this.exceptionCatchHashSet;
 				visitor.setClassName(classNameString);
 				visitor.setMethodName(methodName);
 				visitor.setParameterName(formalParameter);
 				unit2.accept(visitor);
 				exceptionSet.addAll(visitor.exceptionSet);
+				for(String exception: visitor.exceptionSet) {
+					if(this.exceptionCatchHashSet.contains(exception) && !ExceptionVisitor.call_depth.containsKey(exception)) {
+						ExceptionVisitor.call_depth.put(exception, this.recursionLevel);
+						if(this.recursionLevel != 0) {
+							ExceptionVisitor.isFound = true;
+						}
+					}
+				}
 			}
 			catch (Exception e) {
 				System.out.println("cannot parse classfile " + classFile.getElementName());
@@ -208,7 +232,14 @@ public class MethodInvocationVisitor extends ASTVisitor {
 						if(ex.indexOf(";") != -1) {
 							ex = ex.substring(0, ex.length()-1);
 						}
+						String exception = ex.substring(1);
 						exceptionTryHashSet.add(ex.substring(1));  
+						if(this.exceptionCatchHashSet.contains(exception) && !ExceptionVisitor.call_depth.containsKey(exception)) {
+							ExceptionVisitor.call_depth.put(exception, this.recursionLevel);
+							if(this.recursionLevel != 0) {
+								ExceptionVisitor.isFound = true;
+							}
+						}
 					}
 				} catch (JavaModelException e) {
 					// do nothing

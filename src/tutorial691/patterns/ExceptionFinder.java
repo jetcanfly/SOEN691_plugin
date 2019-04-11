@@ -60,7 +60,7 @@ public class ExceptionFinder {
 	static public void serializeMap() {
 		// Use your map and whatever file path you want.
 		try {
-			FileOutputStream outStream = new FileOutputStream("E:/OverCatch.txt");
+			FileOutputStream outStream = new FileOutputStream("E:/call_depth.txt");
 			ObjectOutputStream objectOutputStream = new ObjectOutputStream(outStream);
 			objectOutputStream.writeObject(ExceptionVisitor.metricMap);  // Hard-code, change to your metrics.
 			outStream.close();
@@ -103,6 +103,8 @@ public class ExceptionFinder {
 
 			// We should build 3 Visitors here and use them one by one.
 			ExceptionVisitor exceptionVisitor = new ExceptionVisitor(this.methodException, project);
+			ExceptionVisitor.call_depth.clear();
+			ExceptionVisitor.isFound = false;
 			parsedCompilationUnit.accept(exceptionVisitor);
 			printOverCatchExceptions(exceptionVisitor, parsedCompilationUnit);
 
@@ -157,18 +159,24 @@ public class ExceptionFinder {
 	}
 
 	private void printOverCatchExceptions(ExceptionVisitor visitor, CompilationUnit parsedCompilationUnit) {
-		if(visitor.getTryStatements().size() != 0) {
+		if(!ExceptionVisitor.isFound) {
+			return ;
+		}
+		if(ExceptionVisitor.isFound) {
 			SampleHandler.printMessage("==============================================");
 			System.out.println("==============================================");
-			SampleHandler.printMessage("find overCatch in project: \n" + this.project.getName());
-			System.out.println("find overCatch in project: \n" + this.project.getName());
-			SampleHandler.printMessage("find overCatch in package: \n" + this.packageFragment.getElementName());
-			System.out.println("find overCatch in package: \n" + this.packageFragment.getElementName());
-			SampleHandler.printMessage("find overCatch in file: \n" + this.filePath);
-			System.out.println("find overCatch in file: \n" + this.filePath);
-			HashMap<String, Integer> fileMap = new HashMap<String, Integer>();
-			fileMap.put("overCatch", visitor.countOverCatchPerFile);
-			fileMap.put("overCatchExit", visitor.countOverCatchExitPerFile);
+			SampleHandler.printMessage("find tryclause in project: \n" + this.project.getName());
+			System.out.println("find tryclause in project: \n" + this.project.getName());
+			SampleHandler.printMessage("find tryclause in package: \n" + this.packageFragment.getElementName());
+			System.out.println("find tryclause in package: \n" + this.packageFragment.getElementName());
+			SampleHandler.printMessage("find tryclause in file: \n" + this.filePath);
+			System.out.println("find tryclause in file: \n" + this.filePath);
+			HashMap<String, Float> fileMap = new HashMap<String, Float>();
+			float sum = 0;
+			for(Integer i: ExceptionVisitor.call_depth.values()) {
+				sum += i;
+			}
+			fileMap.put("Try_call_depth", sum/ExceptionVisitor.call_depth.size());
 			ExceptionVisitor.metricMap.put(this.filePath, fileMap);
 		}
 		for(Map.Entry<TryStatement, String> entry: visitor.getTryStatements().entrySet()) {

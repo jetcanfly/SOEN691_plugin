@@ -14,16 +14,15 @@ import org.eclipse.ui.activities.IActivityListener;
 
 
 public class ExceptionVisitor extends ASTVisitor{
-	static public HashMap<String, HashMap<String, Integer>> metricMap = new HashMap<String, HashMap<String,Integer>>();
-	public int countOverCatchPerFile = 0;  // count how many Overcatch for each file
-	public int countOverCatchExitPerFile = 0;  // count how many Overcatch and exit for each file
+	static public HashMap<String, HashMap<String, Float>> metricMap = new HashMap<String, HashMap<String,Float>>();
+	static public HashMap<String, Integer> call_depth = new HashMap<String, Integer>();
+	static public boolean isFound = false;
 	
 	HashMap<TryStatement, String> overCatchTryStatement = new HashMap<>();
 	HashSet<String> exceptionCatchHashSet = new HashSet<>();
 	public HashSet<String> exceptionTryHashSet = new HashSet<>();
 	HashMap<String, HashSet<String>> methodException;  // Given
 	public IProject project;
-	
 	
 	public ExceptionVisitor(HashMap<String, HashSet<String>> fileException) {
 		this.methodException = fileException;
@@ -41,19 +40,18 @@ public class ExceptionVisitor extends ASTVisitor{
 		for(CatchClause catchClause: clauseList) {
 			catchClause.accept(catchVisitor);
 		}
-		if(exceptionCatchHashSet.size() == 0) {  // mustn't be a overCatch
-			return super.visit(node);
-		}
+//		if(exceptionCatchHashSet.size() == 0) {  // mustn't be a overCatch
+//			return super.visit(node);
+//		}
 		
 		Block tryBlock = node.getBody();
 		MethodInvocationVisitor methodInvocationVisitor = new MethodInvocationVisitor(methodException, project);
+		methodInvocationVisitor.exceptionCatchHashSet = this.exceptionCatchHashSet;
 		methodInvocationVisitor.tryStatement = node;
 		tryBlock.accept(methodInvocationVisitor);
 		exceptionTryHashSet.addAll(methodInvocationVisitor.exceptionTryHashSet);
 		if(isOverCatch()) {
 			overCatchTryStatement.put(node, exceptionTryHashSet.toString());
-			this.countOverCatchExitPerFile += catchVisitor.countOverCatchExit;
-			this.countOverCatchPerFile += 1;
 		}
 		clear();
 		return super.visit(node);

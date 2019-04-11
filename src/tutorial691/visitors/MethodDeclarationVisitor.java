@@ -22,6 +22,7 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 public class MethodDeclarationVisitor extends ASTVisitor {
 	public HashSet<String> exceptionSet = new HashSet<String>();
+	public HashSet<String> exceptionCatchHashSet = null;
 	
 	public String getClassName() {
 		return className;
