@@ -16,6 +16,7 @@ public class LogAndThrowVisitor extends ASTVisitor{
 	public int numberOfLogAndThrow = 0;
 	public int numberOfCatch = 0;
 	public int numberOfCatchAndDoNothing = 0;
+	public int numberOfCatchAndReturnNull = 0;
 	
 	
 	
@@ -34,16 +35,20 @@ public class LogAndThrowVisitor extends ASTVisitor{
 		this.numberOfCatch++;
 		
 		
-		// *** Catch and Do Nothing ***
 		List<Statement> statements = node.getBody().statements();		
+		// *** Catch and Do Nothing ***
 		if (statements.size() == 0) {
 			this.numberOfCatchAndDoNothing++;
 		}
 		
 		// *** Catch and Return Null ***
-//		if (isReturnNull(node)) {
-//			catchAndReturnNull.add(node);
-//		}
+		for (Statement statement : statements) {
+			if (statement.getNodeType() == ASTNode.RETURN_STATEMENT) {
+				if (containsIgnoreCase(statement.toString(), "null")) {
+					numberOfCatchAndReturnNull++;
+				}
+			}
+		}
 		
 		// *** Catch generic ***
 //		if (isCatchGeneric(node)) {
