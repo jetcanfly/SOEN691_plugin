@@ -151,6 +151,8 @@ public class ExceptionFinder {
 		fileMap.put("catchQuantity", visitor.numberOfCatch);
 		fileMap.put("catchAndDoNothing", visitor.numberOfCatchAndDoNothing);
 		fileMap.put("catchAndReturnNull", visitor.numberOfCatchAndReturnNull);
+		fileMap.put("catchGeneric", visitor.numberOfCatchGeneric);
+
 		
 		LogAndThrowVisitor.metricMap.put(this.filePath, fileMap);
 

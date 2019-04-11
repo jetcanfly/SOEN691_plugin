@@ -1,6 +1,7 @@
 package tutorial691.visitors;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -8,7 +9,11 @@ import java.util.List;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CatchClause;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.UnionType;
+
 
 
 public class LogAndThrowVisitor extends ASTVisitor{
@@ -17,6 +22,7 @@ public class LogAndThrowVisitor extends ASTVisitor{
 	public int numberOfCatch = 0;
 	public int numberOfCatchAndDoNothing = 0;
 	public int numberOfCatchAndReturnNull = 0;
+	public int numberOfCatchGeneric = 0;
 	
 	
 	
@@ -51,9 +57,22 @@ public class LogAndThrowVisitor extends ASTVisitor{
 		}
 		
 		// *** Catch generic ***
-//		if (isCatchGeneric(node)) {
-//			catchGeneric.add(node);
-//		}
+		Type exceptionType = node.getException().getType();
+		if(exceptionType.isUnionType()) {
+			for(Object eachType: ((UnionType)exceptionType).types()) {
+				String exceptionName = eachType.toString();
+				if (exceptionName.equals("Exception")) {
+					numberOfCatchGeneric++;
+				}
+			}
+			
+		} else {
+			String exceptionName = exceptionType.toString();
+			if (exceptionName.equals("Exception")) {
+				numberOfCatchGeneric++;
+			}
+		}
+		
 		
 		// *** Destructive Wrapping ***
 		
@@ -70,7 +89,7 @@ public class LogAndThrowVisitor extends ASTVisitor{
 		
 //		try {
 //				
-//		} catch (SQLClientInfoException | IOException e2) {
+//		} catch (IOException | SQLException e2) {
 //			
 //		}
 		
