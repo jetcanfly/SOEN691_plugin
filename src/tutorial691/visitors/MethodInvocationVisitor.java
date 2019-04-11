@@ -93,7 +93,13 @@ public class MethodInvocationVisitor extends ASTVisitor {
 			exceptionSet.add(exception);
 		}
 		
-		ICompilationUnit unit = (ICompilationUnit) iMethodBinding.getJavaElement().getAncestor( IJavaElement.COMPILATION_UNIT );
+		ICompilationUnit unit = null;
+		try {
+			unit = (ICompilationUnit) iMethodBinding.getJavaElement().getAncestor( IJavaElement.COMPILATION_UNIT );
+		}
+		catch(Exception ex) {
+			
+		}
 		if(unit != null) {
 			// if not find source code. skip Javadoc, skip traverse
 			// We mostly care methods in target project. Third party without source code wouldn't be handled.
@@ -123,8 +129,14 @@ public class MethodInvocationVisitor extends ASTVisitor {
 			}
 		}
 		
+		IClassFile classFile = null;
+		try {
 		// for methodcall that only has classfile not source code.
-		IClassFile classFile = (IClassFile)iMethodBinding.getJavaElement().getAncestor( IJavaElement.CLASS_FILE );
+			classFile = (IClassFile)iMethodBinding.getJavaElement().getAncestor( IJavaElement.CLASS_FILE );
+		}
+		catch(Exception ex) {
+			System.out.println("getJavaElement return null: " + iMethodBinding.toString());
+		}
 		if(classFile != null) {
 			CompilationUnit unit2 = null;
 			try {

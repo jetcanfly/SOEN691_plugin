@@ -4,7 +4,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -18,9 +20,9 @@ import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.osgi.framework.util.FilePath;
 
 import tutorial691.handlers.DetectException;
 import tutorial691.handlers.SampleHandler;
@@ -33,6 +35,8 @@ public class ExceptionFinder {
 	HashMap<String, HashSet<String>> methodException = new HashMap<String, HashSet<String>>();
 	IProject project = null;
 	IPackageFragment packageFragment = null;
+	ICompilationUnit iCompilationUnit = null;
+	String filePath = null;
 	static public IJavaProject jProject = null;
 	static public HashMap<String, HashSet<IType>> hierachyMap = new HashMap<String, HashSet<IType>>();
 	
@@ -51,24 +55,44 @@ public class ExceptionFinder {
 	
 	private void checkExceptions(IPackageFragment packageFragment) throws JavaModelException {
 		for (ICompilationUnit unit : packageFragment.getCompilationUnits()) {
+			this.iCompilationUnit = unit;
+			// get source path
+			IResource resource = null;
+			try {
+				resource = this.iCompilationUnit.getUnderlyingResource();
+			} catch (JavaModelException e) {
+				// TODO Auto-generated catch block
+				System.out.println("Something wrong1");
+			}
+			if(resource != null && resource.getType() == IResource.FILE) {
+				IFile ifile = (IFile) resource;
+				String path = ifile.getRawLocation().toString();
+				if(path.contains("src\test") || path.contains("src/test") || !path.contains(".java")) {
+					continue;
+				}
+				if(path.contains("kylin")) {
+					this.filePath = path.substring(path.indexOf("kylin") + 6);
+					SampleHandler.printMessage("**********checking file: \n" + path);
+					System.out.println("**********checking file: \n" + path);
+				}
+				else {
+					System.out.println("Something wrong2");
+				}
+			}
 			CompilationUnit parsedCompilationUnit = parse(unit);
-			
-			// We should build 3 Visitors here and use them one by one.
-			SampleHandler.printMessage("	checking: " + parsedCompilationUnit.getJavaElement().getElementName());
-			System.out.println("	checking: " + parsedCompilationUnit.getJavaElement().getElementName());
-//		
-			
-			ExceptionVisitor exceptionVisitor = new ExceptionVisitor(this.methodException, project);
-			parsedCompilationUnit.accept(exceptionVisitor);
-			printOverCatchExceptions(exceptionVisitor, parsedCompilationUnit);
 
-			LogAndThrowVisitor logAndThrowVistor = new LogAndThrowVisitor();
-			parsedCompilationUnit.accept(logAndThrowVistor);
-			printLogAndThrowExceptions(logAndThrowVistor);
-			
-			MultipleThrowsVisitor multipleException  = new MultipleThrowsVisitor();
-			parsedCompilationUnit.accept(multipleException);
-			printMultipleExceptions(multipleException,parsedCompilationUnit);
+			// We should build 3 Visitors here and use them one by one.
+//			ExceptionVisitor exceptionVisitor = new ExceptionVisitor(this.methodException, project);
+//			parsedCompilationUnit.accept(exceptionVisitor);
+//			printOverCatchExceptions(exceptionVisitor, parsedCompilationUnit);
+
+//			LogAndThrowVisitor logAndThrowVistor = new LogAndThrowVisitor();
+//			parsedCompilationUnit.accept(logAndThrowVistor);
+//			printLogAndThrowExceptions(logAndThrowVistor);
+//			
+//			MultipleThrowsVisitor multipleException  = new MultipleThrowsVisitor();
+//			parsedCompilationUnit.accept(multipleException);
+//			printMultipleExceptions(multipleException,parsedCompilationUnit);
 		} 
 	}
 	
@@ -120,19 +144,13 @@ public class ExceptionFinder {
 			System.out.println("find overCatch in project: \n" + this.project.getName());
 			SampleHandler.printMessage("find overCatch in package: \n" + this.packageFragment.getElementName());
 			System.out.println("find overCatch in package: \n" + this.packageFragment.getElementName());
+			SampleHandler.printMessage("find overCatch in file: \n" + this.packageFragment.getElementName());
+			System.out.println("find overCatch in file: \n" + this.packageFragment.getElementName());
 		}
-//		else {
-//			SampleHandler.printMessage("	checked: " + parsedCompilationUnit.getJavaElement().getElementName());
-//			System.out.println("	checked: " + parsedCompilationUnit.getJavaElement().getElementName());
-//		}
 		for(Map.Entry<TryStatement, String> entry: visitor.getTryStatements().entrySet()) {
 			TryStatement statement = entry.getKey();
 			String tryException = entry.getValue();
-			MethodDeclaration methodDeclaration = findMethodForCatch(statement);
-			SampleHandler.printMessage("find in class: \n" + ((TypeDeclaration)(methodDeclaration.getParent())).getName());
-			System.out.println("find in class: \n" + ((TypeDeclaration)(methodDeclaration.getParent())).getName());
-			SampleHandler.printMessage("find in method: \n" + methodDeclaration.getName());
-			System.out.println("find in method: \n" + methodDeclaration.getName());
+			
 			SampleHandler.printMessage("exceptions in try clause: \n" + tryException);
 			System.out.println("exceptions in try clause: \n" + tryException);
 			SampleHandler.printMessage("try-catch statement: \n");
@@ -147,6 +165,9 @@ public class ExceptionFinder {
 	}
 	
 	private ASTNode findParentMethodDeclaration(ASTNode node) {
+		if(node.getParent() == null) {
+			return null;
+		}
 		if(node.getParent().getNodeType() == ASTNode.METHOD_DECLARATION) {
 			return node.getParent();
 		} else {
