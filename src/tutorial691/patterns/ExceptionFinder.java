@@ -1,5 +1,9 @@
 package tutorial691.patterns;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -31,7 +35,7 @@ import tutorial691.visitors.LogAndThrowVisitor;
 import tutorial691.visitors.MultipleThrowsVisitor;
 
 public class ExceptionFinder {
-	
+
 	HashMap<String, HashSet<String>> methodException = new HashMap<String, HashSet<String>>();
 	IProject project = null;
 	IPackageFragment packageFragment = null;
@@ -39,20 +43,36 @@ public class ExceptionFinder {
 	String filePath = null;
 	static public IJavaProject jProject = null;
 	static public HashMap<String, HashSet<IType>> hierachyMap = new HashMap<String, HashSet<IType>>();
-	
+
 	public void findExceptions(IProject project) throws JavaModelException {
 		this.project = project;
 		jProject = JavaCore.create(project);
 		IPackageFragment[] packages = jProject.getPackageFragments();
-		
+
 		for(IPackageFragment mypackage : packages){
 			this.packageFragment = mypackage;
 			SampleHandler.printMessage("**********checking package: " + mypackage.getElementName());
 			System.out.println("**********checking package: " + mypackage.getElementName());
 			checkExceptions(mypackage);
 		}
-}
+	}
 	
+	static public void serializeMap() {
+		// Use your map and whatever file path you want.
+		try {
+			FileOutputStream outStream = new FileOutputStream("E:/OverCatch.txt");
+			ObjectOutputStream objectOutputStream = new ObjectOutputStream(outStream);
+			objectOutputStream.writeObject(ExceptionVisitor.metricMap);  // Hard-code, change to your metrics.
+			outStream.close();
+			System.out.println("successful");
+
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
 	private void checkExceptions(IPackageFragment packageFragment) throws JavaModelException {
 		for (ICompilationUnit unit : packageFragment.getCompilationUnits()) {
 			this.iCompilationUnit = unit;
@@ -82,20 +102,20 @@ public class ExceptionFinder {
 			CompilationUnit parsedCompilationUnit = parse(unit);
 
 			// We should build 3 Visitors here and use them one by one.
-//			ExceptionVisitor exceptionVisitor = new ExceptionVisitor(this.methodException, project);
-//			parsedCompilationUnit.accept(exceptionVisitor);
-//			printOverCatchExceptions(exceptionVisitor, parsedCompilationUnit);
+			ExceptionVisitor exceptionVisitor = new ExceptionVisitor(this.methodException, project);
+			parsedCompilationUnit.accept(exceptionVisitor);
+			printOverCatchExceptions(exceptionVisitor, parsedCompilationUnit);
 
-//			LogAndThrowVisitor logAndThrowVistor = new LogAndThrowVisitor();
-//			parsedCompilationUnit.accept(logAndThrowVistor);
-//			printLogAndThrowExceptions(logAndThrowVistor);
-//			
-//			MultipleThrowsVisitor multipleException  = new MultipleThrowsVisitor();
-//			parsedCompilationUnit.accept(multipleException);
-//			printMultipleExceptions(multipleException,parsedCompilationUnit);
+			//			LogAndThrowVisitor logAndThrowVistor = new LogAndThrowVisitor();
+			//			parsedCompilationUnit.accept(logAndThrowVistor);
+			//			printLogAndThrowExceptions(logAndThrowVistor);
+			//			
+			//			MultipleThrowsVisitor multipleException  = new MultipleThrowsVisitor();
+			//			parsedCompilationUnit.accept(multipleException);
+			//			printMultipleExceptions(multipleException,parsedCompilationUnit);
 		} 
 	}
-	
+
 	private void printMultipleExceptions(MultipleThrowsVisitor visitor, CompilationUnit compilationunit) {
 
 		if(visitor.getMethodName().size() != 0) {
@@ -123,11 +143,11 @@ public class ExceptionFinder {
 			SampleHandler.printMessage("+++++++++++++++++++++++++\n\n");
 		}
 	}
-	
+
 	private void printLogAndThrowExceptions(LogAndThrowVisitor visitor) {
 		for (CatchClause catchClause : visitor.getLogAndThrowCathesCatchClauses()) {
 			MethodDeclaration methodDeclaration = findMethodForCatch(catchClause);
-			
+
 			SampleHandler.printMessage("find method suffers from Log and Throw: \n" + methodDeclaration.toString());
 			System.out.println("find method suffers from Log and Throw: \n" + methodDeclaration.toString());
 			SampleHandler.printMessage(catchClause.toString());
@@ -135,7 +155,7 @@ public class ExceptionFinder {
 
 		}
 	}
-	
+
 	private void printOverCatchExceptions(ExceptionVisitor visitor, CompilationUnit parsedCompilationUnit) {
 		if(visitor.getTryStatements().size() != 0) {
 			SampleHandler.printMessage("==============================================");
@@ -144,13 +164,17 @@ public class ExceptionFinder {
 			System.out.println("find overCatch in project: \n" + this.project.getName());
 			SampleHandler.printMessage("find overCatch in package: \n" + this.packageFragment.getElementName());
 			System.out.println("find overCatch in package: \n" + this.packageFragment.getElementName());
-			SampleHandler.printMessage("find overCatch in file: \n" + this.packageFragment.getElementName());
-			System.out.println("find overCatch in file: \n" + this.packageFragment.getElementName());
+			SampleHandler.printMessage("find overCatch in file: \n" + this.filePath);
+			System.out.println("find overCatch in file: \n" + this.filePath);
+			HashMap<String, Integer> fileMap = new HashMap<String, Integer>();
+			fileMap.put("overCatch", visitor.countOverCatchPerFile);
+			fileMap.put("overCatchExit", visitor.countOverCatchExitPerFile);
+			ExceptionVisitor.metricMap.put(this.filePath, fileMap);
 		}
 		for(Map.Entry<TryStatement, String> entry: visitor.getTryStatements().entrySet()) {
 			TryStatement statement = entry.getKey();
 			String tryException = entry.getValue();
-			
+
 			SampleHandler.printMessage("exceptions in try clause: \n" + tryException);
 			System.out.println("exceptions in try clause: \n" + tryException);
 			SampleHandler.printMessage("try-catch statement: \n");
@@ -163,7 +187,7 @@ public class ExceptionFinder {
 			System.out.println("==============================================\n\n");
 		}
 	}
-	
+
 	private ASTNode findParentMethodDeclaration(ASTNode node) {
 		if(node.getParent() == null) {
 			return null;
@@ -174,15 +198,15 @@ public class ExceptionFinder {
 			return findParentMethodDeclaration(node.getParent());
 		}
 	}
-	
+
 	private MethodDeclaration findMethodForCatch(TryStatement catchClause) {
 		return (MethodDeclaration) findParentMethodDeclaration(catchClause);
 	}
-	
+
 	private MethodDeclaration findMethodForCatch(CatchClause catchClause) {
 		return (MethodDeclaration) findParentMethodDeclaration(catchClause);
 	}
-	
+
 	public static CompilationUnit parse(ICompilationUnit unit) {
 		ASTParser parser = ASTParser.newParser(AST.JLS11);
 		parser.setKind(ASTParser.K_COMPILATION_UNIT);
@@ -190,7 +214,7 @@ public class ExceptionFinder {
 		parser.setResolveBindings(true);
 		return (CompilationUnit) parser.createAST(null); // parse
 	}
-	
+
 	public static CompilationUnit parse(String classfile) {
 		ASTParser parser = ASTParser.newParser(AST.JLS11);
 		parser.setKind(ASTParser.K_COMPILATION_UNIT);
@@ -198,7 +222,7 @@ public class ExceptionFinder {
 		parser.setResolveBindings(true);
 		return (CompilationUnit) parser.createAST(null); // parse
 	}
-	
+
 	/**
 	 * @param project
 	 * @param superName
@@ -213,7 +237,7 @@ public class ExceptionFinder {
 		if(hierachyMap.containsKey(superName)) {
 			return hierachyMap.get(superName);
 		}
-		
+
 		if(jProject == null) {
 			jProject = JavaCore.create(project);
 		}
@@ -235,7 +259,7 @@ public class ExceptionFinder {
 					}
 				}
 			}
-			
+
 		} catch (JavaModelException e1) {
 			e1.printStackTrace();
 		}
