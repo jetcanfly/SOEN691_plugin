@@ -63,7 +63,7 @@ public class ExceptionFinder {
 		try {
 			FileOutputStream outStream = new FileOutputStream("E:/OverCatch.txt");
 			ObjectOutputStream objectOutputStream = new ObjectOutputStream(outStream);
-			objectOutputStream.writeObject(ExceptionVisitor.metricMap);  // Hard-code, change to your metrics.
+			objectOutputStream.writeObject(TrySizeVisitor.output);  // Hard-code, change to your metrics.
 			outStream.close();
 			System.out.println("successful");
 
@@ -116,11 +116,20 @@ public class ExceptionFinder {
 			//			printMultipleExceptions(multipleException,parsedCompilationUnit);
 			TrySizeVisitor trySizeVisitor = new TrySizeVisitor();
 			parsedCompilationUnit.accept(trySizeVisitor);
-			printSizeQuantityExceptions(trySizeVisitor);
+			printSizeQuantityExceptions(trySizeVisitor,parsedCompilationUnit);
 		} 
 	}
-	private void printSizeQuantityExceptions(TrySizeVisitor visitor) {
-		
+	private void printSizeQuantityExceptions(TrySizeVisitor visitor,CompilationUnit compilationunit) {
+		Map<String,Integer> metricAndValue = visitor.getOutput2();
+		String path = compilationunit.getJavaElement().getPath().toString().substring(1);
+		if(path.substring(0, 6).equals("kylin-")) {
+			path = path.substring(6);
+		}
+		if(path.contains("src\test") || path.contains("src/test") || metricAndValue.get("TryQuantity")==0|| metricAndValue.get("TryLOC")==0|| metricAndValue.get("TryCondition")==0|| metricAndValue.get("TryLoop")==0 ) {
+			
+		}else {
+			visitor.getOutput().put(path, metricAndValue);
+		}
 		SampleHandler.printMessage("find Try Quantity: \n" + visitor.getTryQuantity());
 		SampleHandler.printMessage("find Try LOC: \n" + visitor.getTrySize());
 		SampleHandler.printMessage("find Try Condition Scope: \n" +visitor.getTryCondition());
