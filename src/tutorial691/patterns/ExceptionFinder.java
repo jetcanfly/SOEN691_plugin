@@ -60,7 +60,7 @@ public class ExceptionFinder {
 	static public void serializeMap() {
 		// Use your map and whatever file path you want.
 		try {
-			FileOutputStream outStream = new FileOutputStream("E:/OverCatch.txt");
+			FileOutputStream outStream = new FileOutputStream("E:/unreachable.txt");
 			ObjectOutputStream objectOutputStream = new ObjectOutputStream(outStream);
 			objectOutputStream.writeObject(ExceptionVisitor.metricMap);  // Hard-code, change to your metrics.
 			outStream.close();
@@ -103,6 +103,8 @@ public class ExceptionFinder {
 
 			// We should build 3 Visitors here and use them one by one.
 			ExceptionVisitor exceptionVisitor = new ExceptionVisitor(this.methodException, project);
+			ExceptionVisitor.isReached = true;
+			ExceptionVisitor.numberOfUnreachable = 0;
 			parsedCompilationUnit.accept(exceptionVisitor);
 			printOverCatchExceptions(exceptionVisitor, parsedCompilationUnit);
 
@@ -157,18 +159,20 @@ public class ExceptionFinder {
 	}
 
 	private void printOverCatchExceptions(ExceptionVisitor visitor, CompilationUnit parsedCompilationUnit) {
-		if(visitor.getTryStatements().size() != 0) {
+		if(ExceptionVisitor.numberOfUnreachable == 0) {
+			return;
+		}
+		if(ExceptionVisitor.numberOfUnreachable != 0) {
 			SampleHandler.printMessage("==============================================");
 			System.out.println("==============================================");
-			SampleHandler.printMessage("find overCatch in project: \n" + this.project.getName());
-			System.out.println("find overCatch in project: \n" + this.project.getName());
-			SampleHandler.printMessage("find overCatch in package: \n" + this.packageFragment.getElementName());
-			System.out.println("find overCatch in package: \n" + this.packageFragment.getElementName());
-			SampleHandler.printMessage("find overCatch in file: \n" + this.filePath);
-			System.out.println("find overCatch in file: \n" + this.filePath);
+			SampleHandler.printMessage("find unreachable in project: \n" + this.project.getName());
+			System.out.println("find unreachable in project: \n" + this.project.getName());
+			SampleHandler.printMessage("find unreachable in package: \n" + this.packageFragment.getElementName());
+			System.out.println("find unreachable in package: \n" + this.packageFragment.getElementName());
+			SampleHandler.printMessage("find unreachable in file: \n" + this.filePath);
+			System.out.println("find unreachable in file: \n" + this.filePath);
 			HashMap<String, Integer> fileMap = new HashMap<String, Integer>();
-			fileMap.put("overCatch", visitor.countOverCatchPerFile);
-			fileMap.put("overCatchExit", visitor.countOverCatchExitPerFile);
+			fileMap.put("unreachable", ExceptionVisitor.numberOfUnreachable);
 			ExceptionVisitor.metricMap.put(this.filePath, fileMap);
 		}
 		for(Map.Entry<TryStatement, String> entry: visitor.getTryStatements().entrySet()) {
