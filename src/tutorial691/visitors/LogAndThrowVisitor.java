@@ -2,6 +2,7 @@ package tutorial691.visitors;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -9,10 +10,15 @@ import java.util.List;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CatchClause;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.UnionType;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
 
 
 
@@ -24,6 +30,7 @@ public class LogAndThrowVisitor extends ASTVisitor{
 	public int numberOfCatchAndReturnNull = 0;
 	public int numberOfCatchGeneric = 0;
 	public int numberOfDummyHandle = 0;
+	public int numberOfDestructiveWrapping = 0;
 			
 	
 	
@@ -57,26 +64,42 @@ public class LogAndThrowVisitor extends ASTVisitor{
 			}
 		}
 		
+		List<String> exceptionList = new ArrayList<String>();
+		
 		// *** Catch generic ***
 		Type exceptionType = node.getException().getType();
 		if(exceptionType.isUnionType()) {
 			for(Object eachType: ((UnionType)exceptionType).types()) {
 				String exceptionName = eachType.toString();
+				exceptionList.add(exceptionName);
 				if (exceptionName.equals("Exception")) {
 					this.numberOfCatchGeneric++;
 				}
-			}
-			
+			}	
 		} else {
 			String exceptionName = exceptionType.toString();
+			exceptionList.add(exceptionName);
 			if (exceptionName.equals("Exception")) {
 				this.numberOfCatchGeneric++;
 			}
 		}
 		
-		
 		// *** Destructive Wrapping ***
-		
+		String arumentsName = node.getException().resolveBinding().getName();
+		for (Statement statement : statements) {
+			if (statement.getNodeType() == ASTNode.THROW_STATEMENT) {
+				Expression expression = (Expression) ((ThrowStatement) statement).getExpression();
+				if (expression instanceof ClassInstanceCreation) {
+					List<Expression> argumentList = ((ClassInstanceCreation) expression).arguments();
+					for (Expression argument : argumentList) {
+						if (argument.toString().equals(arumentsName)) {
+							this.numberOfDestructiveWrapping++;
+						}
+					}
+				}
+				
+			}
+		}
 		
 		// *** Dummy Handle ***
 		for (Statement statement : statements) {
@@ -103,9 +126,9 @@ public class LogAndThrowVisitor extends ASTVisitor{
 //		try {
 //				
 //		} catch (IOException | SQLException e2) {
-//			
+//			throw new IOException();
 //		}
-		
+
 		
 		// *** log and throw ***
 		if (isLogAndThrow(node)) {
@@ -120,6 +143,13 @@ public class LogAndThrowVisitor extends ASTVisitor{
 		
 		
 		// *** Relying on getCause() ***
+		
+		
+		
+		
+		
+		
+		
 		
 		
 		// *** Throw within Finally ***
