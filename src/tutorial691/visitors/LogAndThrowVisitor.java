@@ -30,7 +30,8 @@ public class LogAndThrowVisitor extends ASTVisitor{
 	public int numberOfCatchGeneric = 0;
 	public int numberOfDummyHandle = 0;
 	public int numberOfDestructiveWrapping = 0;
-	public int numberOfLogAndReturnNull = 0;	
+	public int numberOfLogAndReturnNull = 0;
+	public int numberOfMultiLineLog = 0;
 	
 	
 	public HashSet<CatchClause> logAndThrowCathesCatchClauses = new HashSet<>();
@@ -128,7 +129,9 @@ public class LogAndThrowVisitor extends ASTVisitor{
 		}
 		
 		// *** Multi-Line Log ***
-		
+		if (isMultiLineLog(statements)) {
+			this.numberOfMultiLineLog++;
+		}
 		
 		// *** Nested Try ***
 		
@@ -138,6 +141,24 @@ public class LogAndThrowVisitor extends ASTVisitor{
 		
 		
 		return super.visit(node);
+	}
+	
+	private boolean isMultiLineLog(List<Statement> statements) {
+		int logTimes = 0;
+		
+		for (Statement statement : statements) {
+			String statementString = statement.toString();
+			if(containsIgnoreCase(statementString, "printStackTrace")) {
+				logTimes++;
+			} else if(containsIgnoreCase(statementString, "print")){
+				logTimes++;
+			} else if( (containsIgnoreCase(statementString, "log") ||
+					containsIgnoreCase(statementString, "logger"))) {
+					logTimes++;
+			}
+		}
+		
+		return logTimes > 1 ? true : false;
 	}
 	
 	private boolean isLogAndThrow(CatchClause node) {

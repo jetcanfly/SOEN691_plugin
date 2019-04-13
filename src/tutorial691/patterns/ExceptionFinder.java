@@ -135,10 +135,11 @@ public class ExceptionFinder {
 		fileMap.put("dummyHandle", visitor.numberOfDummyHandle);
 		fileMap.put("destructiveWrapping", visitor.numberOfDestructiveWrapping);
 		fileMap.put("logAndReturnNull", visitor.numberOfLogAndReturnNull);
+		fileMap.put("multiLineLog", visitor.numberOfMultiLineLog);
 		
-		LogAndThrowVisitor.metricMap.put(this.filePath, fileMap);
-
 		
+		
+		LogAndThrowVisitor.metricMap.put(this.filePath, fileMap);	
 	}
 
 	private void printOverCatchExceptions(ExceptionVisitor visitor, CompilationUnit parsedCompilationUnit) {
