@@ -107,13 +107,13 @@ public class ExceptionFinder {
 //			parsedCompilationUnit.accept(exceptionVisitor);
 //			printOverCatchExceptions(exceptionVisitor, parsedCompilationUnit);
 
-//						LogAndThrowVisitor logAndThrowVistor = new LogAndThrowVisitor();
-//						parsedCompilationUnit.accept(logAndThrowVistor);
-//						printLogAndThrowExceptions(logAndThrowVistor);
+						LogAndThrowVisitor logAndThrowVistor = new LogAndThrowVisitor();
+						parsedCompilationUnit.accept(logAndThrowVistor);
+						printLogAndThrowExceptions(logAndThrowVistor);
 						
-						MultipleThrowsVisitor multipleException  = new MultipleThrowsVisitor();
-						parsedCompilationUnit.accept(multipleException);
-						printMultipleExceptions(multipleException);
+//						MultipleThrowsVisitor multipleException  = new MultipleThrowsVisitor();
+//						parsedCompilationUnit.accept(multipleException);
+//						printMultipleExceptions(multipleException);
 		} 
 	}
 
@@ -134,6 +134,7 @@ public class ExceptionFinder {
 		fileMap.put("catchGeneric", visitor.numberOfCatchGeneric);
 		fileMap.put("dummyHandle", visitor.numberOfDummyHandle);
 		fileMap.put("destructiveWrapping", visitor.numberOfDestructiveWrapping);
+		fileMap.put("logAndReturnNull", visitor.numberOfLogAndReturnNull);
 		
 		LogAndThrowVisitor.metricMap.put(this.filePath, fileMap);
 

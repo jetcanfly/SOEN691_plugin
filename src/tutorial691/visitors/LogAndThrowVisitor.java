@@ -21,7 +21,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 
 
-
 public class LogAndThrowVisitor extends ASTVisitor{
 	static public HashMap<String, HashMap<String, Integer>> metricMap = new HashMap<String, HashMap<String,Integer>>();
 	public int numberOfLogAndThrow = 0;
@@ -31,25 +30,17 @@ public class LogAndThrowVisitor extends ASTVisitor{
 	public int numberOfCatchGeneric = 0;
 	public int numberOfDummyHandle = 0;
 	public int numberOfDestructiveWrapping = 0;
-			
+	public int numberOfLogAndReturnNull = 0;	
 	
 	
-	
-	
-	
-	
-
-
 	public HashSet<CatchClause> logAndThrowCathesCatchClauses = new HashSet<>();
 		
 	@Override
-	public boolean visit(CatchClause node) {
+	public boolean visit(final CatchClause node) {
 		// *** Catch Quantity ***
 		this.numberOfCatch++;
 		
-		
 		List<Statement> statements = node.getBody().statements();
-		
 		// *** Catch and Do Nothing ***
 		if (statements.size() == 0) {
 			this.numberOfCatchAndDoNothing++;
@@ -65,7 +56,6 @@ public class LogAndThrowVisitor extends ASTVisitor{
 		}
 		
 		List<String> exceptionList = new ArrayList<String>();
-		
 		// *** Catch generic ***
 		Type exceptionType = node.getException().getType();
 		if(exceptionType.isUnionType()) {
@@ -111,7 +101,6 @@ public class LogAndThrowVisitor extends ASTVisitor{
 				break;
 			}
 		}
-
 		
 		// *** Ignoring InterruptedException ***
 		
@@ -120,13 +109,15 @@ public class LogAndThrowVisitor extends ASTVisitor{
 		
 		
 		// *** Log and Return Null ***
-		
+		if (isLogAndReturnNull(node)) {
+			this.numberOfLogAndReturnNull++;
+		}
 		
 		
 //		try {
 //				
 //		} catch (IOException | SQLException e2) {
-//			throw new IOException();
+//			return null;
 //		}
 
 		
@@ -145,18 +136,6 @@ public class LogAndThrowVisitor extends ASTVisitor{
 		// *** Relying on getCause() ***
 		
 		
-		
-		
-		
-		
-		
-		
-		
-		// *** Throw within Finally ***
-		
-		// *** Throws Generic ***
-		
-		// *** Throws Kitchen Sink ***
 		
 		return super.visit(node);
 	}
@@ -191,6 +170,38 @@ public class LogAndThrowVisitor extends ASTVisitor{
 		return false;
 	}
 	
+	private boolean isLogAndReturnNull(CatchClause node) {
+		boolean returnNullflag = false;
+		boolean printstacktraceflag = false;
+		boolean logflag = false;
+		boolean printflag = false;
+		
+		String body = node.getBody().toString();
+	
+		if (this.containsIgnoreCase(body, "return null;")) {
+			returnNullflag = true;
+		}
+		
+		if(containsIgnoreCase(body, "printStackTrace")) {
+			printstacktraceflag = true;
+		}
+		if(containsIgnoreCase(body, "print")){
+			printflag = true;
+		}
+		if( (containsIgnoreCase(body, "log") ||
+				containsIgnoreCase(body, "logger"))) {
+				logflag = true;
+		}
+		
+		if (logflag || printstacktraceflag || printflag) {
+			if (returnNullflag) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
 	private boolean containsIgnoreCase(String str, String searchStr) {
 		 if(str == null || searchStr == null) return false;
 
@@ -204,4 +215,5 @@ public class LogAndThrowVisitor extends ASTVisitor{
 		    }
 		    return false;
 	}
+
 }
