@@ -107,42 +107,22 @@ public class ExceptionFinder {
 //			parsedCompilationUnit.accept(exceptionVisitor);
 //			printOverCatchExceptions(exceptionVisitor, parsedCompilationUnit);
 
-						LogAndThrowVisitor logAndThrowVistor = new LogAndThrowVisitor();
-						parsedCompilationUnit.accept(logAndThrowVistor);
-						printLogAndThrowExceptions(logAndThrowVistor);
-			//			
-			//			MultipleThrowsVisitor multipleException  = new MultipleThrowsVisitor();
-			//			parsedCompilationUnit.accept(multipleException);
-			//			printMultipleExceptions(multipleException,parsedCompilationUnit);
+//						LogAndThrowVisitor logAndThrowVistor = new LogAndThrowVisitor();
+//						parsedCompilationUnit.accept(logAndThrowVistor);
+//						printLogAndThrowExceptions(logAndThrowVistor);
+						
+						MultipleThrowsVisitor multipleException  = new MultipleThrowsVisitor();
+						parsedCompilationUnit.accept(multipleException);
+						printMultipleExceptions(multipleException);
 		} 
 	}
 
-	private void printMultipleExceptions(MultipleThrowsVisitor visitor, CompilationUnit compilationunit) {
-
-		if(visitor.getMethodName().size() != 0) {
-			SampleHandler.printMessage("+++++++++Find multiple exception throw+++++++++");
-			System.out.println("+++++++++Find multiple exception throw+++++++++");
-			SampleHandler.printMessage("find multiple exception throw in project: \n" + this.project.getName());
-			System.out.println("find multiple exception throw in project: \n" + this.project.getName());
-			SampleHandler.printMessage("find multiple exception throw in package: \n" + this.packageFragment.getElementName());
-			System.out.println("find multiple exception throw in package: \n" + this.packageFragment.getElementName());
-		}
-		for(MethodDeclaration method:visitor.getMethodName()) {
-			SampleHandler.printMessage("find in class: \n" + ((TypeDeclaration)(method.getParent())).getName());
-			System.out.println("find in class: \n" + ((TypeDeclaration)(method.getParent())).getName());
-			SampleHandler.printMessage("Method: "+method.getName());
-			System.out.println("Method: "+method.getName());
-			SampleHandler.printMessage("Exception Names: ");
-			System.out.println("Exception Names: ");
-			for(Object type:method.thrownExceptionTypes()) {
-				SampleHandler.printMessage(type.toString());
-				System.out.println(type.toString());
-			}
-		}
-		if(visitor.getMethodName().size() != 0) {
-			System.out.print("+++++++++++++++++++++++++\n\n");
-			SampleHandler.printMessage("+++++++++++++++++++++++++\n\n");
-		}
+	private void printMultipleExceptions(MultipleThrowsVisitor visitor) {
+		HashMap<String, Integer> fileMap = new HashMap<String, Integer>();
+		fileMap.put("thorwsGeneric", visitor.numberOfThrowsGeneric);
+		fileMap.put("multipleThrows", visitor.numberOfMultipleThrows);
+		
+		LogAndThrowVisitor.metricMap.put(this.filePath, fileMap);
 	}
 
 	private void printLogAndThrowExceptions(LogAndThrowVisitor visitor) {
