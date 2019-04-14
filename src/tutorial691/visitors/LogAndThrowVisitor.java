@@ -32,6 +32,7 @@ public class LogAndThrowVisitor extends ASTVisitor{
 	public int numberOfDestructiveWrapping = 0;
 	public int numberOfLogAndReturnNull = 0;
 	public int numberOfMultiLineLog = 0;
+	public int numberOfRelyingOnGetCause = 0;
 	
 	
 	public HashSet<CatchClause> logAndThrowCathesCatchClauses = new HashSet<>();
@@ -103,24 +104,10 @@ public class LogAndThrowVisitor extends ASTVisitor{
 			}
 		}
 		
-		// *** Ignoring InterruptedException ***
-		
-		
-		//  *** Incomplete Implementation ***
-		
-		
 		// *** Log and Return Null ***
 		if (isLogAndReturnNull(node)) {
 			this.numberOfLogAndReturnNull++;
-		}
-		
-		
-//		try {
-//				
-//		} catch (IOException | SQLException e2) {
-//			return null;
-//		}
-
+		}		
 		
 		// *** log and throw ***
 		if (isLogAndThrow(node)) {
@@ -137,10 +124,35 @@ public class LogAndThrowVisitor extends ASTVisitor{
 		
 		
 		// *** Relying on getCause() ***
+		int number = isRelyingOnGetCause(statements);
+		if (number > 0) {
+			System.out.println(node);
+		}
+		this.numberOfRelyingOnGetCause += number;
+		
+		// *** Ignoring InterruptedException ***
 		
 		
+		//  *** Incomplete Implementation ***
+	
+		
+//		try {
+//				
+//		} catch (IOException | SQLException e2) {
+//			return null;
+//		}
 		
 		return super.visit(node);
+	}
+	
+	private int isRelyingOnGetCause(List<Statement> statements) {
+		int number = 0;
+		for (Statement statement : statements) {
+			if (this.containsIgnoreCase(statement.toString(), ".getCause()")) {
+				number++;
+			}
+		}
+		return number;
 	}
 	
 	private boolean isMultiLineLog(List<Statement> statements) {
