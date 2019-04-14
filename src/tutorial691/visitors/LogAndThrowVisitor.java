@@ -33,6 +33,7 @@ public class LogAndThrowVisitor extends ASTVisitor{
 	public int numberOfLogAndReturnNull = 0;
 	public int numberOfMultiLineLog = 0;
 	public int numberOfRelyingOnGetCause = 0;
+	public int numberOfIncompleteImplementation = 0;
 	
 	
 	public HashSet<CatchClause> logAndThrowCathesCatchClauses = new HashSet<>();
@@ -120,21 +121,22 @@ public class LogAndThrowVisitor extends ASTVisitor{
 			this.numberOfMultiLineLog++;
 		}
 		
-		// *** Nested Try ***
-		
-		
 		// *** Relying on getCause() ***
 		int number = isRelyingOnGetCause(statements);
-		if (number > 0) {
-			System.out.println(node);
-		}
 		this.numberOfRelyingOnGetCause += number;
 		
 		// *** Ignoring InterruptedException ***
 		
 		
 		//  *** Incomplete Implementation ***
-	
+		for (Statement statement : statements) {
+			if (this.containsIgnoreCase(statement.toString(), "TODO") || this.containsIgnoreCase(statement.toString(), "FIXME")) {
+				this.numberOfIncompleteImplementation++;
+			}
+		}
+		
+		// *** LOC&SLOC ***
+		
 		
 //		try {
 //				

@@ -137,7 +137,7 @@ public class ExceptionFinder {
 		fileMap.put("logAndReturnNull", visitor.numberOfLogAndReturnNull);
 		fileMap.put("multiLineLog", visitor.numberOfMultiLineLog);
 		fileMap.put("relyingOnGetCause", visitor.numberOfRelyingOnGetCause);
-		
+		fileMap.put("incompleteImplementation", visitor.numberOfIncompleteImplementation);
 		
 		LogAndThrowVisitor.metricMap.put(this.filePath, fileMap);	
 	}
