@@ -138,6 +138,7 @@ public class ExceptionFinder {
 		fileMap.put("multiLineLog", visitor.numberOfMultiLineLog);
 		fileMap.put("relyingOnGetCause", visitor.numberOfRelyingOnGetCause);
 		fileMap.put("incompleteImplementation", visitor.numberOfIncompleteImplementation);
+		fileMap.put("ignoreInterruptedException", visitor.numberOfIgnoreInterruptedException);
 		
 		LogAndThrowVisitor.metricMap.put(this.filePath, fileMap);	
 	}

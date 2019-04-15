@@ -34,6 +34,7 @@ public class LogAndThrowVisitor extends ASTVisitor{
 	public int numberOfMultiLineLog = 0;
 	public int numberOfRelyingOnGetCause = 0;
 	public int numberOfIncompleteImplementation = 0;
+	public int numberOfIgnoreInterruptedException = 0;
 	
 	
 	public HashSet<CatchClause> logAndThrowCathesCatchClauses = new HashSet<>();
@@ -126,7 +127,10 @@ public class LogAndThrowVisitor extends ASTVisitor{
 		this.numberOfRelyingOnGetCause += number;
 		
 		// *** Ignoring InterruptedException ***
-		
+		if (isIgnoreInterruptedException(node)) {
+			this.numberOfIgnoreInterruptedException++;
+			System.out.println(node);
+		}
 		
 		//  *** Incomplete Implementation ***
 		for (Statement statement : statements) {
@@ -141,10 +145,37 @@ public class LogAndThrowVisitor extends ASTVisitor{
 //		try {
 //				
 //		} catch (IOException | SQLException e2) {
+//			e2.getCause();
 //			return null;
 //		}
 		
 		return super.visit(node);
+	}
+	
+	private boolean isIgnoreInterruptedException(CatchClause node) {
+		boolean flag = false;
+		Type exceptionType = node.getException().getType();
+		if(exceptionType.isUnionType()) {
+			for(Object eachType: ((UnionType)exceptionType).types()) {
+				String exceptionName = eachType.toString();
+				if (exceptionName.equals("InterruptedException")) {
+					flag = true;
+				}
+			}	
+		} else {
+			String exceptionName = exceptionType.toString();
+			if (exceptionName.equals("InterruptedException")) {
+				flag = true;
+			}
+		}
+		
+		if (flag) {
+			String name = node.getException().getName().toString();
+			if (!this.containsIgnoreCase(node.toString(), name)) {
+				return true;
+			}
+		}	
+		return false;
 	}
 	
 	private int isRelyingOnGetCause(List<Statement> statements) {
