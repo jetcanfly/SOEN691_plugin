@@ -35,6 +35,7 @@ public class LogAndThrowVisitor extends ASTVisitor{
 	public int numberOfRelyingOnGetCause = 0;
 	public int numberOfIncompleteImplementation = 0;
 	public int numberOfIgnoreInterruptedException = 0;
+	public int loc = 0;
 	
 	
 	public HashSet<CatchClause> logAndThrowCathesCatchClauses = new HashSet<>();
@@ -139,15 +140,10 @@ public class LogAndThrowVisitor extends ASTVisitor{
 			}
 		}
 		
-		// *** LOC&SLOC ***
-		
-		
-//		try {
-//				
-//		} catch (IOException | SQLException e2) {
-//			e2.getCause();
-//			return null;
-//		}
+		// *** LOC ***
+		String catchString = node.getBody().toString();
+		String[] catchStrings = catchString.split("\\r?\\n");
+		this.loc += (catchStrings.length - 2);
 		
 		return super.visit(node);
 	}
